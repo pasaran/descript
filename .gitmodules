@@ -1,0 +1,3 @@
+[submodule "noscript"]
+	path = noscript
+	url = git@github.com:pasaran/noscript.git
