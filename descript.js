@@ -37,12 +37,19 @@ var modules = global.modules = {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 var util = require('./lib/util.js');
+
 var Block = require('./lib/block.js');
+var Result = require('./lib/result.js');
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 var server = $http.createServer( function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'text/javascript; charset: utf-8' });
+    // res.writeHead(200, { 'Content-Type': 'text/javascript; charset: utf-8' });
+
+    // res.statusCode = 302;
+    // res.setHeader('Location', 'http://www.yandex.ru');
+
+    // res.setHeader('Set-Cookie', [ 'a=42', 'b=24' ]);
 
     var url = $url.parse( req.url, true );
 
@@ -64,6 +71,9 @@ var server = $http.createServer( function (req, res) {
 
     var block = new Block.Root(path);
     block.run(context).then(function(result) {
+        if (result instanceof Result.Error && result.get('id') === 'NOT_FOUND') {
+            res.statusCode = 404;
+        }
         res.end( JSON.stringify( result.object(), null, '    ') ); // FIXME: Для красоты временно форматируем ответ.
     });
 });
