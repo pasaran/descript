@@ -27,17 +27,11 @@ ya.auth = function(promise, context) {
         format: 'json'
     });
 
-    util.httpGet( {
+    util.http.get( {
         host: host,
         path: path,
         port: 80
-    }, function(error, result) {
-        if (error) {
-            promise.resolve( new Result.Value(error) );
-        } else {
-            promise.resolve( new Result(result.data) );
-        }
-    } );
+    }, promise );
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
