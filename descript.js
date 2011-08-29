@@ -44,6 +44,8 @@ var Result = require('./lib/result.js');
 // ----------------------------------------------------------------------------------------------------------------- //
 
 var server = $http.createServer( function (req, res) {
+    res.setHeader( 'Content-Type', 'text/javascript; charset: utf-8' );
+
     // res.writeHead(200, { 'Content-Type': 'text/javascript; charset: utf-8' });
 
     // res.statusCode = 302;
@@ -71,7 +73,7 @@ var server = $http.createServer( function (req, res) {
 
     var block = new Block.Root(path);
     block.run(context).then(function(result) {
-        if (result instanceof Result.Error && result.get('id') === 'NOT_FOUND') {
+        if (result instanceof Result.Error && result.get('id') === 'FILE_OPEN_ERROR') {
             res.statusCode = 404;
         }
         res.end( JSON.stringify( result.object(), null, '    ') ); // FIXME: Для красоты временно форматируем ответ.

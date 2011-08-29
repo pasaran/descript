@@ -31,7 +31,9 @@ ya.auth = function(promise, context) {
         host: host,
         path: path,
         port: 80
-    }, promise );
+    }, function(result) {
+        promise.resolve(result);
+    } );
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //

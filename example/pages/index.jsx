@@ -1,5 +1,9 @@
 {
-    common: 'common.jsx' +100,
+    common: 'common/common.jsx' +100,
 
-    data: 42
+    answer: 42,
+
+    yandex: 'http://www.yandex.ru',
+
+    search: 'http://yandex.ru/yandsearch?'
 }
