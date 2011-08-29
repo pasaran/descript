@@ -46,7 +46,8 @@ var server = $http.createServer( function (req, res) {
 
     var block = new Block.Root(path);
     block.run(context).then(function(result) {
-        res.end( result.string(), 'utf-8' );
+        res.end( JSON.stringify( result.object(), null, '    ') );
+        // res.end( result.string(), 'utf-8' );
     });
 });
 
