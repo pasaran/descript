@@ -6,20 +6,38 @@ var $path = require('path');
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var config = global.config = require('./config.js');
+var program = require('./deps/commander.js');
 
-config.rootdir = $path.resolve('pages');
+program
+    .version('0.0.1')
+    .option('-c, --config <path>', 'Path to config', 'config.js')
+    .option('-r, --rootdir <dir>', 'Root directory', '.')
+    .parse(process.argv);
+
+var cwd = process.cwd();
+
+var config;
+try {
+    var configPath = $path.resolve( cwd, program.config );
+    config = global.config = require(configPath);
+} catch (e) {
+    console.log( program.helpInformation() );
+    console.log( 'ERROR: Cannot open config file:', configPath, '\n' );
+    process.exit(1);
+}
+
+config.rootdir = $path.resolve( cwd, program.rootdir );
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 var modules = global.modules = {
-    ya: require('./modules/ya.js')
+    ya: require('./example/modules/ya.js')
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var Block = require('../lib/block.js');
-var util = require('../lib/util.js');
+var util = require('./lib/util.js');
+var Block = require('./lib/block.js');
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
@@ -46,7 +64,7 @@ var server = $http.createServer( function (req, res) {
 
     var block = new Block.Root(path);
     block.run(context).then(function(result) {
-        res.end( JSON.stringify( result.object(), null, '    ') );
+        res.end( JSON.stringify( result.object(), null, '    ') ); // FIXME: Для красоты временно форматируем ответ.
     });
 });
 
