@@ -76,7 +76,7 @@ var server = $http.createServer( function (req, res) {
         if (result instanceof Result.Error && result.get('id') === 'FILE_OPEN_ERROR') {
             res.statusCode = 404;
         }
-        res.end( JSON.stringify( result.object(), null, '    ') ); // FIXME: Для красоты временно форматируем ответ.
+        res.end( result.formatted() ); // FIXME: Для красоты временно форматируем ответ.
     });
 });
 
