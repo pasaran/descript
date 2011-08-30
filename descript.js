@@ -40,6 +40,7 @@ var util = require('./lib/util.js');
 
 var Block = require('./lib/block.js');
 var Result = require('./lib/result.js');
+var Response = require('./lib/response.js');
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
@@ -58,12 +59,14 @@ var server = $http.createServer( function (req, res) {
     var headers = req.headers;
     var cookies = util.parseCookies( headers['cookie'] || '' );
 
+    var response = new Response();
     var context = {
-        state: {},
+        state: {}, // Может быть тут тоже сделать new State()?
         request: url.query,
         headers: headers,
         cookies: cookies,
-        config: config
+        config: config,
+        response: response
     };
 
     var path = url.pathname;
@@ -75,7 +78,30 @@ var server = $http.createServer( function (req, res) {
     block.run(context).then(function(result) {
         if (result instanceof Result.Error && result.get('id') === 'FILE_OPEN_ERROR') {
             res.statusCode = 404;
+            res.end( result.formatted() );
+            return;
         }
+
+        var headers = response.headers;
+        for (var header in headers) {
+            res.setHeader(header, headers[header]);
+        }
+
+        var cookies = response.cookies;
+        var cookie = [];
+        for (var name in cookies) {
+            cookie.push(name + '=' + cookies[name]);
+        }
+        res.setHeader('Set-Cookie', cookie); // FIXME: Выставлять expire и т.д.
+
+        if (response.location) {
+            res.statusCode = 302;
+            res.setHeader('location', response.location);
+            res.end();
+            return;
+        }
+
+        res.statusCode = response.status || 200;
         res.end( result.formatted() ); // FIXME: Для красоты временно форматируем ответ.
     });
 });
