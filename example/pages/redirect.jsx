@@ -1,4 +1,4 @@
 function(context) {
-    context.response.redirect('http://www.yandex.ru');
+    context.response.setRedirect('http://www.yandex.ru');
     return null;
 }

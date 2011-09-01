@@ -40,36 +40,16 @@ var util = require('./lib/util.js');
 
 var Block = require('./lib/block.js');
 var Result = require('./lib/result.js');
-var Response = require('./lib/response.js');
+var Context = require('./lib/context.js');
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 var server = $http.createServer( function (req, res) {
     res.setHeader( 'Content-Type', 'text/javascript; charset: utf-8' );
 
-    // res.writeHead(200, { 'Content-Type': 'text/javascript; charset: utf-8' });
+    var context = new Context(req, res, config);
 
-    // res.statusCode = 302;
-    // res.setHeader('Location', 'http://www.yandex.ru');
-
-    // res.setHeader('Set-Cookie', [ 'a=42', 'b=24' ]);
-
-    var url = $url.parse( req.url, true );
-
-    var headers = req.headers;
-    var cookies = util.parseCookies( headers['cookie'] || '' );
-
-    var response = new Response();
-    var context = {
-        state: {}, // Может быть тут тоже сделать new State()?
-        request: url.query,
-        headers: headers,
-        cookies: cookies,
-        config: config,
-        response: response
-    };
-
-    var path = url.pathname;
+    var path = context.request.path;
     if (path === '/') {
         path = '/index.jsx';
     }
@@ -82,27 +62,8 @@ var server = $http.createServer( function (req, res) {
             return;
         }
 
-        var headers = response.headers;
-        for (var header in headers) {
-            res.setHeader(header, headers[header]);
-        }
-
-        var cookies = response.cookies;
-        var cookie = [];
-        for (var name in cookies) {
-            cookie.push(name + '=' + cookies[name]);
-        }
-        res.setHeader('Set-Cookie', cookie); // FIXME: Выставлять expire и т.д.
-
-        if (response.location) {
-            res.statusCode = 302;
-            res.setHeader('location', response.location);
-            res.end();
-            return;
-        }
-
-        res.statusCode = response.status || 200;
-        res.end( result.formatted() ); // FIXME: Для красоты временно форматируем ответ.
+        // context.response.end( result.string() );
+        context.response.end( result.formatted() ); // FIXME: Для красоты временно форматируем ответ.
     });
 });
 

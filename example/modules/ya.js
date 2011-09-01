@@ -4,10 +4,6 @@ var $querystring = require('querystring');
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var config = global.config || {};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
 var Result = require('../../lib/result.js');
 var util = require('../../lib/util.js');
 
@@ -18,12 +14,15 @@ var ya = {};
 // ----------------------------------------------------------------------------------------------------------------- //
 
 ya.auth = function(promise, context) {
-    var host = config.blackbox.host;
-    var path = config.blackbox.path + '?' + $querystring.stringify({
+    var blackboxConfig = context.config.blackbox;
+    var request = context.request;
+
+    var host = blackboxConfig.host;
+    var path = blackboxConfig.path + '?' + $querystring.stringify({
         method: 'sessionid',
-        userip: context.headers['x-real-ip'],
-        sessionid: context.cookies['Session_id'],
-        host: config.blackbox.domain,
+        userip: request.headers['x-real-ip'],
+        sessionid: request.cookies['Session_id'],
+        host: blackboxConfig.domain,
         format: 'json'
     });
 
