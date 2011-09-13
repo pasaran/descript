@@ -2,30 +2,30 @@
 // Response
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var Response = function(response) {
+de.Response = function(response) {
     this._response = response;
 
     this.headers = {};
     this.cookies = {};
 };
 
-Response.prototype.setHeader = function(name, value) {
+de.Response.prototype.setHeader = function(name, value) {
     this.headers[name] = value;
 };
 
-Response.prototype.setCookie = function(name, value) {
+de.Response.prototype.setCookie = function(name, value) {
     this.cookies[name] = value;
 };
 
-Response.prototype.setStatus = function(status) {
+de.Response.prototype.setStatus = function(status) {
     this.status = status;
 };
 
-Response.prototype.setRedirect = function(location) {
+de.Response.prototype.setRedirect = function(location) {
     this.location = location;
 };
 
-Response.prototype.end = function(data) {
+de.Response.prototype.end = function(data) {
     var response = this._response;
 
     var headers = this.headers;
@@ -50,10 +50,6 @@ Response.prototype.end = function(data) {
     response.statusCode = this.status || 200;
     response.end(data);
 };
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-module.exports = Response;
 
 // ----------------------------------------------------------------------------------------------------------------- //
 

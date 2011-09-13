@@ -1,19 +1,15 @@
 // ----------------------------------------------------------------------------------------------------------------- //
-
-var $util = require('util');
-
-// ----------------------------------------------------------------------------------------------------------------- //
-// Result
+// de.Result
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var Result = function() {};
+de.Result = function() {};
 
-Result.prototype.formatted = function() {
+de.Result.prototype.formatted = function() {
     return JSON.stringify( this.object(), null, '    ' );
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Result.Raw
+// de.Result.Raw
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
@@ -21,21 +17,21 @@ Result.prototype.formatted = function() {
     @param {Array.<Buffer>} result
     @param {boolean|undefined} isJSON
 */
-Result.Raw = function(result, isJSON) {
+de.Result.Raw = function(result, isJSON) {
     this.result = result;
     this.isJSON = isJSON;
 };
 
-$util.inherits( Result.Raw, Result );
+node.util.inherits( de.Result.Raw, de.Result );
 
-Result.Raw.prototype.write(stream) {
+de.Result.Raw.prototype.write = function(stream) {
     var result = this.result;
     for (var i = 0, l = result.length; i < l; i++) {
         stream.write( result[i] );
     }
 };
 
-Result.Raw.prototype.string = function() {
+de.Result.Raw.prototype.string = function() {
     var s = this._string;
 
     if (!s) {
@@ -45,7 +41,7 @@ Result.Raw.prototype.string = function() {
     return s;
 };
 
-Result.Raw.prototype.object = function() {
+de.Result.Raw.prototype.object = function() {
     var o = this._object;
 
     if (!o) {
@@ -56,20 +52,20 @@ Result.Raw.prototype.object = function() {
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Result.Value
+// de.Result.Value
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Result.Value = function(result) {
+de.Result.Value = function(result) {
     this.result = result;
 };
 
-$util.inherits( Result.Value, Result );
+node.util.inherits( de.Result.Value, de.Result );
 
-Result.Value.prototype.write = function(stream) {
+de.Result.Value.prototype.write = function(stream) {
     stream.write( this.string() );
 };
 
-Result.Value.prototype.string = function() {
+de.Result.Value.prototype.string = function() {
     var s = this._string;
 
     if (s === undefined) {
@@ -79,37 +75,37 @@ Result.Value.prototype.string = function() {
     return s;
 };
 
-Result.Value.prototype.object = function() {
+de.Result.Value.prototype.object = function() {
     return this.result;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Result.Error
+// de.Result.Error
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Result.Error = function(error) {
+de.Result.Error = function(error) {
     this.result = {
         error: error || {}
     };
 };
 
-$util.inherits( Result.Error, Result.Value );
+node.util.inherits( de.Result.Error, de.Result.Value );
 
-Result.Error.prototype.get = function(field) {
+de.Result.Error.prototype.get = function(field) {
     return this.result.error[field];
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Result.Array
+// de.Result.Array
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Result.Array = function(result) {
+de.Result.Array = function(result) {
     this.result = result;
 };
 
-$util.inherits( Result.Array, Result );
+node.util.inherits( de.Result.Array, de.Result );
 
-Result.Array.prototype.write = function(stream) {
+de.Result.Array.prototype.write = function(stream) {
     stream.write('[');
     for (var i = 0, l = result.length; i < l; i++) {
         if (i) {
@@ -120,7 +116,7 @@ Result.Array.prototype.write = function(stream) {
     stream.write(']');
 };
 
-Result.Array.prototype.string = function() {
+de.Result.Array.prototype.string = function() {
     var s = this._string;
 
     if (s === undefined) {
@@ -141,7 +137,7 @@ Result.Array.prototype.string = function() {
     return s;
 };
 
-Result.Array.prototype.object = function() {
+de.Result.Array.prototype.object = function() {
     var o = this._object;
 
     if (!o) {
@@ -157,16 +153,16 @@ Result.Array.prototype.object = function() {
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Result.Object
+// de.Result.Object
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Result.Object = function(result) {
+de.Result.Object = function(result) {
     this.result = result;
 };
 
-$util.inherits( Result.Object, Result );
+node.util.inherits( de.Result.Object, de.Result );
 
-Result.Object.prototype.write = function(stream) {
+de.Result.Object.prototype.write = function(stream) {
     stream.write('{');
     var i = 0;
     for (var key in result) {
@@ -179,7 +175,7 @@ Result.Object.prototype.write = function(stream) {
     stream.write('}');
 };
 
-Result.Object.prototype.string = function() {
+de.Result.Object.prototype.string = function() {
     var s = this._string;
 
     if (s === undefined) {
@@ -201,7 +197,7 @@ Result.Object.prototype.string = function() {
     return s;
 };
 
-Result.Object.prototype.object = function() {
+de.Result.Object.prototype.object = function() {
     var o = this._object;
 
     if (!o) {
@@ -215,10 +211,6 @@ Result.Object.prototype.object = function() {
 
     return o;
 };
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-module.exports = Result;
 
 // ----------------------------------------------------------------------------------------------------------------- //
 

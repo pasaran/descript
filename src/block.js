@@ -1,39 +1,15 @@
 // ----------------------------------------------------------------------------------------------------------------- //
-
-var $fs = require('fs');
-var $path = require('path');
-var $url = require('url');
-var $util = require('util');
-var $vm = require('vm');
-
+// de.Block
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var config = global.config || {};
-var modules = global.modules || {};
+de.Block = function(block, options) {};
 
-// ----------------------------------------------------------------------------------------------------------------- //
-
-var Promise = require('../deps/noscript/promise.js');
-
-var Result = require('./result.js');
-var util = require('./util.js');
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-var fileCache = {};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-// Block
-// ----------------------------------------------------------------------------------------------------------------- //
-
-var Block = function(block, options) {};
-
-Block.prototype.setOptions = function(options) {
+de.Block.prototype.setOptions = function(options) {
     this.options = options = options || {};
 
     this.priority = 0;
 
-    this.dirname = options.dirname || config.rootdir;
+    this.dirname = options.dirname || de.config.rootdir;
 
     var guard = options.guard;
     if (guard) {
@@ -48,7 +24,7 @@ Block.prototype.setOptions = function(options) {
     var select = options.select;
     if (select) {
         for (var key in select) {
-            select[key] = util.compileJPath(select[key]);
+            select[key] = de.util.compileJPath(select[key]);
         }
         this.select = select;
     }
@@ -61,14 +37,14 @@ Block.prototype.setOptions = function(options) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block._id = 0;
-Block._blocks = {};
+de.Block._id = 0;
+de.Block._blocks = {};
 
-Block.prototype.valueOf = function() {
+de.Block.prototype.valueOf = function() {
     var id = this._id;
     if (!id) {
-        id = this._id = '@block' + Block._id++ + '@';
-        Block._blocks[id] = this;
+        id = this._id = '@block' + de.Block._id++ + '@';
+        de.Block._blocks[id] = this;
     }
 
     return id;
@@ -76,8 +52,8 @@ Block.prototype.valueOf = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.prototype.run = function(context) {
-    var promise = new Promise();
+de.Block.prototype.run = function(context) {
+    var promise = new no.Promise();
 
     var before = this.before;
     if (before) {
@@ -86,7 +62,7 @@ Block.prototype.run = function(context) {
 
     var guard = this.guard;
     if (guard && !guard(context)) {
-        promise.resolve( new Result.Value(null) ); // FIXME: Или же возвращать ошибку.
+        promise.resolve( new de.Result.Value(null) ); // FIXME: Или же возвращать ошибку.
     } else {
         var timeout;
         if (this.timeout) {
@@ -97,7 +73,7 @@ Block.prototype.run = function(context) {
             });
 
             timeout = setTimeout(function() {
-                promise.resolve( new Result.Error({
+                promise.resolve( new de.Result.Error({
                     id: 'TIMEOUT',
                     message: 'Timeout' // FIXME: Вменяемый текст.
                 }) );
@@ -131,45 +107,45 @@ Block.prototype.run = function(context) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.prototype.subblocks = function() {
+de.Block.prototype.subblocks = function() {
     return [ this ];
 };
 
-Block.prototype.getResult = function(result) {
+de.Block.prototype.getResult = function(result) {
     return result.results[ result.index++ ];
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.prototype.setPriority = function(priority) {
+de.Block.prototype.setPriority = function(priority) {
     this.priority = priority;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.prototype.getParams = function(context) {
+de.Block.prototype.getParams = function(context) {
     var params = this.options.params;
 
     return (params) ? params(context) : context.request.query;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.Array
+// de.Block.Array
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.Array = function(array, options) {
+de.Block.Array = function(array, options) {
     this.setOptions(options);
 
     var blocks = this.blocks = [];
 
     for (var i = 0, l = array.length; i < l; i++) {
-        blocks.push( Block.compile( array[i], options ) );
+        blocks.push( de.Block.compile( array[i], options ) );
     }
 };
 
-$util.inherits( Block.Array, Block );
+node.util.inherits( de.Block.Array, de.Block );
 
-Block.Array.prototype.subblocks = function() {
+de.Block.Array.prototype.subblocks = function() {
     var subblocks = [];
 
     var blocks = this.blocks;
@@ -180,7 +156,7 @@ Block.Array.prototype.subblocks = function() {
     return subblocks;
 };
 
-Block.Array.prototype.getResult = function(result) {
+de.Block.Array.prototype.getResult = function(result) {
     var blocks = this.blocks;
     var r = [];
 
@@ -188,10 +164,10 @@ Block.Array.prototype.getResult = function(result) {
         r.push( blocks[i].getResult(result) );
     }
 
-    return new Result.Array(r);
+    return new de.Result.Array(r);
 };
 
-Block.Array.prototype.setPriority = function(priority) {
+de.Block.Array.prototype.setPriority = function(priority) {
     var blocks = this.blocks;
 
     for (var i = 0, l = blocks.length; i < l; i++) {
@@ -200,27 +176,27 @@ Block.Array.prototype.setPriority = function(priority) {
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.Object
+// de.Block.Object
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.Object = function(object, options) {
+de.Block.Object = function(object, options) {
     this.setOptions(options);
 
     var blocks = this.blocks = [];
     var keys = this.keys = [];
 
     for (var key in object) {
-        blocks.push( Block.compile( object[key], options ) );
+        blocks.push( de.Block.compile( object[key], options ) );
         keys.push(key);
     }
 };
 
-$util.inherits( Block.Object, Block );
+node.util.inherits( de.Block.Object, de.Block );
 
-Block.Object.prototype.subblocks = Block.Array.prototype.subblocks;
-Block.Object.prototype.setPriority = Block.Array.prototype.setPriority;
+de.Block.Object.prototype.subblocks = de.Block.Array.prototype.subblocks;
+de.Block.Object.prototype.setPriority = de.Block.Array.prototype.setPriority;
 
-Block.Object.prototype.getResult = function(result) {
+de.Block.Object.prototype.getResult = function(result) {
     var blocks = this.blocks;
     var keys = this.keys;
 
@@ -230,166 +206,137 @@ Block.Object.prototype.getResult = function(result) {
         r[ keys[i] ] = blocks[i].getResult(result);
     }
 
-    return new Result.Object(r);
+    return new de.Result.Object(r);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.File
+// de.Block.File
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.File = function(filename, options) {
+de.Block.File = function(filename, options) {
     this.setOptions(options);
 
-    this.filename = util.compileString(filename);
+    this.filename = de.util.compileString(filename);
 };
 
-$util.inherits( Block.File, Block );
+node.util.inherits( de.Block.File, de.Block );
 
-var readingCache = {};
+de.Block.File.prototype._run = function(promise, context) {
+    var filename = de.util.resolveFilename( this.dirname, this.filename(context) );
 
-Block.File.prototype._run = function(promise, context) {
-    var params = this.getParams(context);
-
-    var filename = util.resolveFilename( this.dirname, this.filename(context) );
-    var result = fileCache[filename];
-    if (result) {
-        promise.resolve(result);
-        return;
-    }
-
-    var readPromise = readingCache[filename];
-    if (!readPromise) {
-        readPromise = readingCache[filename] = new Promise();
-
-        $fs.readFile(filename, function(error, result) {
-            if (error) {
-                readPromise.reject(error);
-            } else {
-                readPromise.resolve(result);
-            }
+    de.file.get(filename)
+        .then(function(result) {
+            promise.resolve( new de.Result.Raw(result) );
+        })
+        .else_(function(error) {
+            promise.resolve( new de.Result.Error(error) );
         });
-    }
-
-    readPromise.then(function(result) {
-        var ext = $path.extname(filename);
-        if (ext === '.json') {
-            result = new Result.Raw([ result ], true);
-        } else {
-            result = new Result.Raw([ result ]);
-        }
-        fileCache[filename] = result;
-        promise.resolve(result);
-    });
-    readPromise.else_(function(error) {
-        promise.resolve( new Result.Error({
-            id: 'FILE_OPEN_ERROR',
-            message: error.message
-        }) );
-    });
-
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.Function
+// de.Block.Function
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.Function = function(func, options) {
+de.Block.Function = function(func, options) {
     this.func = func;
     this.setOptions(options);
 };
 
-$util.inherits( Block.Function, Block );
+node.util.inherits( de.Block.Function, de.Block );
 
-Block.Function.prototype._run = function(promise, context) {
+de.Block.Function.prototype._run = function(promise, context) {
     var result = this.func(context);
 
-    var block = new Block.Root(result); // FIXME: Правильные options.
+    var block = new de.Block.Root(result); // FIXME: Правильные options.
     block.run(context).then(function(result) {
         promise.resolve(result);
     });
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.Call
+// de.Block.Call
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.Call = function(call, options) {
+de.Block.Call = function(call, options) {
     this.setOptions(options);
 
     var r = call.match(/^(?:(.*?):)?(.*)\(\)$/);
 
-    var module = r[1] || config.defaultModule;
+    var module = r[1] || de.config.defaultModule;
     var method = this.method = r[2];
 
-    module = modules[module];
+    module = de.modules[module];
 
     var call = module[method];
     this.call = (typeof call === 'function') ? call : module;
 };
 
-$util.inherits(Block.Call, Block);
+node.util.inherits(de.Block.Call, de.Block);
 
-Block.Call.prototype._run = function(promise, context) {
+de.Block.Call.prototype._run = function(promise, context) {
     this.call(promise, context);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.Include
+// de.Block.Include
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.Include = function(filename, options) {
+de.Block.Include = function(filename, options) {
     this.setOptions(options);
 
-    this.filename = util.compileString(filename);
+    this.filename = de.util.compileString(filename);
 };
 
-$util.inherits(Block.Include, Block);
+node.util.inherits(de.Block.Include, de.Block);
 
-Block.Include.prototype._run = function(promise, context) {
-    var filename = util.resolveFilename( this.dirname, this.filename(context) );
-    var root = fileCache[filename];
+de.Block.Include._cache = {};
 
-    if (root) {
-        root.run(context).then( function(result) {
+de.Block.Include.prototype._run = function(promise, context) {
+    var filename = de.util.resolveFilename( this.dirname, this.filename(context) );
+
+    var block = de.Block.Include._cache[filename];
+    if (block) {
+        block.run(context).then(function(result) {
             promise.resolve(result);
-        } );
+        });
         return;
     }
 
-    var dirname = $path.dirname(filename);
+    var that = this;
 
-    $fs.readFile(filename, 'utf-8', function(error, content) {
-        if (error) {
-            promise.resolve( new Result.Error({
-                id: 'FILE_OPEN_ERROR',
-                message: error.message
-            }) );
-        } else {
+    de.file.get(filename)
+        .then(function(result) {
             try {
-                var include = $vm.runInNewContext( '(' + content + ')', sandbox, filename);
+                var content = result.join('');
+                var include = node.vm.runInNewContext( '(' + content + ')', de.sandbox, filename);
 
-                var options = util.extends( {}, this.options, { dirname: dirname } );
-                var root = fileCache[filename] = new Block.Root(include, options);
+                var dirname = node.path.dirname(filename);
 
-                root.run(context).then( function(result) {
+                var options = de.util.extends( {}, that.options, { dirname: dirname } );
+                var block = de.Block.Include._cache[filename] = new de.Block.Root(include, options);
+
+                block.run(context).then(function(result) {
                     promise.resolve(result);
-                } );
+                });
             } catch (e) {
-                promise.resolve( new Result.Error({
+                promise.resolve( new de.Result.Error({
                     id: 'FILE_EVAL_ERROR',
-                    message: e.message
+                    message: e.message,
+                    e: e
                 }) );
             }
+        })
+        .else_(function(error) {
+            promise.resolve( new de.Result.Error(error) );
+        });
 
-        }
-    });
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.Http
+// de.Block.Http
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.Http = function(url, options) {
+de.Block.Http = function(url, options) {
     this.setOptions(options);
 
     if (/(\?|&)$/.test(url)) {
@@ -397,46 +344,50 @@ Block.Http = function(url, options) {
         url = url.substr(0, url.length - 1);
     }
 
-    this.url = util.compileString(url);
+    this.url = de.util.compileString(url);
 };
 
-$util.inherits(Block.Http, Block);
+node.util.inherits(de.Block.Http, de.Block);
 
-Block.Http.prototype._run = function(promise, context) {
-    var options = util.http.url2options(
+de.Block.Http.prototype._run = function(promise, context) {
+    var options = de.http.url2options(
         this.url(context),
         (this.extend) ? this.getParams(context) : null
     );
 
-    util.http.get(options, function(result) {
-        promise.resolve(result);
-    });
+    de.http.get(options)
+        .then(function(result) {
+            promise.resolve( new de.Result.Raw(result) ); // FIXME: Учесть options.dataType.
+        })
+        .else_(function(error) {
+            promise.resolve( new de.Result.Error(error) );
+        });
 
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.Value
+// de.Block.Value
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.Value = function(value, options) {
+de.Block.Value = function(value, options) {
     this.setOptions(options);
     this.value = value;
 };
 
-$util.inherits(Block.Value, Block);
+node.util.inherits(de.Block.Value, de.Block);
 
-Block.Value.prototype._run = function(promise, params) {
-    promise.resolve( new Result.Value(this.value) );
+de.Block.Value.prototype._run = function(promise, params) {
+    promise.resolve( new de.Result.Value(this.value) );
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
-// Block.Root
+// de.Block.Root
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.Root = function(root, options) {
+de.Block.Root = function(root, options) {
     this.setOptions(options);
 
-    this.root = Block.compile(root, options);
+    this.root = de.Block.compile(root, options);
 
     var subblocks = this.subblocks = this.root.subblocks();
 
@@ -450,9 +401,9 @@ Block.Root = function(root, options) {
     this.subblocks = sorted.sort(function(a, b) { return b.block.priority - a.block.priority; });
 };
 
-$util.inherits( Block.Root, Block );
+node.util.inherits( de.Block.Root, de.Block );
 
-Block.Root.prototype._run = function(promise, context) {
+de.Block.Root.prototype._run = function(promise, context) {
     var that = this;
 
     var results = [];
@@ -481,7 +432,7 @@ Block.Root.prototype._run = function(promise, context) {
                 block = next;
             } while (!endgroup);
 
-            Promise.wait(promises).then(run);
+            no.Promise.wait(promises).then(run);
 
         } else {
             promise.resolve(that.root.getResult({
@@ -494,7 +445,7 @@ Block.Root.prototype._run = function(promise, context) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-Block.compile = function(block, options) {
+de.Block.compile = function(block, options) {
 
     options = options || {};
 
@@ -509,18 +460,18 @@ Block.compile = function(block, options) {
 
             if (( r = /^http:\/\//.test(block) )) { // Строка начинается с 'http://' -- это http-блок.
                                                     // FIXME: Поддержка https, post, get и т.д.
-                compiled = new Block.Http(block, options);
+                compiled = new de.Block.Http(block, options);
 
             } else if (( r = block.match(/^(.*\(\))(\d+)?$/) )) { // Строка оканчивается на '()' -- это call-блок.
-                compiled = new Block.Call(r[1], options);
+                compiled = new de.Block.Call(r[1], options);
                 priority = r[2];
 
             } else if (( r = block.match(/^(.*\.jsx)(\d+)?$/) )) { // Строка оканчивается на '.jsx' -- это include-блок.
-                compiled = new Block.Include(r[1], options);
+                compiled = new de.Block.Include(r[1], options);
                 priority = r[2];
 
             } else if (( r = block.match(/^(.*\.(?:json|txt|xml))(\d+)?$/) )) { // Строка оканчивается на '.json' -- это file-блок.
-                compiled = new Block.File(r[1], options);
+                compiled = new de.Block.File(r[1], options);
                 priority = r[2];
 
             //  В предыдущих трех случаях в конце строки может быть число, означающее приоритет.
@@ -536,17 +487,17 @@ Block.compile = function(block, options) {
             //          ...
             //      }
             //
-            //  Работает это за счет того, что у Block переопределен метод valueOf,
+            //  Работает это за счет того, что у de.Block переопределен метод valueOf,
             //  который возвращает уникальную строку вида '@block25@'.
 
             } else if (( r = block.match(/^(@block\d+@)(\d+)$/) ) || ( r = block.match(/^(\d+)(@block\d+@)$/) )) { // Строка вида '@block25@45' или '45@block25@',
                                                                                                                    // где 25 это порядковый номер блока, а 45 -- приоритет.
                 var id = r[1];
 
-                compiled = Block._blocks[id];
+                compiled = de.Block._blocks[id];
                 priority = r[2];
 
-                delete Block._blocks[id];
+                delete de.Block._blocks[id];
 
             }
 
@@ -555,10 +506,10 @@ Block.compile = function(block, options) {
         case 'object':
 
             if (block instanceof Array) {
-                compiled = new Block.Array(block, options);
+                compiled = new de.Block.Array(block, options);
 
-            } else if (block && !(block instanceof Block)) {
-                compiled = new Block.Object(block, options);
+            } else if (block && !(block instanceof de.Block)) {
+                compiled = new de.Block.Object(block, options);
 
             } else {
                 compiled = block;
@@ -569,14 +520,14 @@ Block.compile = function(block, options) {
 
         case 'function':
 
-            compiled = new Block.Function(block, options);
+            compiled = new de.Block.Function(block, options);
 
             break;
 
     }
 
     if (!compiled) {
-        compiled = new Block.Value(block, options);
+        compiled = new de.Block.Value(block, options);
     }
 
     if (priority) {
@@ -589,53 +540,41 @@ Block.compile = function(block, options) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var sandbox = {};
+de.sandbox = {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-sandbox.block = Block.compile;
-
-sandbox.http = function(url, options) {
-    return new Block.Http(url, options);
+de.sandbox['http'] = function(url, options) {
+    return new de.Block.Http(url, options);
 };
 
-sandbox.file = function(filename, options) {
-    return new Block.File(filename, options);
+de.sandbox['file'] = function(filename, options) {
+    return new de.Block.File(filename, options);
 };
 
-sandbox.include = function(filename, options) {
-    return new Block.Include(filename, options);
+de.sandbox['include'] = function(filename, options) {
+    return new de.Block.Include(filename, options);
 };
 
-sandbox.call = function(call, options) {
-    return new Block.Call(call, options);
+de.sandbox['call'] = function(call, options) {
+    return new de.Block.Call(call, options);
 };
 
-sandbox.array = function(array, options) {
-    return new Block.Array(array, options);
+de.sandbox['array'] = function(array, options) {
+    return new de.Block.Array(array, options);
 };
 
-sandbox.object = function(object, options) {
-    return new Block.Object(object, options);
+de.sandbox['object'] = function(object, options) {
+    return new de.Block.Object(object, options);
 };
 
-sandbox.value = function(value, options) {
-    return new Block.Value(value, options);
+de.sandbox['value'] = function(value, options) {
+    return new de.Block.Value(value, options);
 };
 
-sandbox.func = function(func, options) {
-    return new Block.Function(func, options);
+de.sandbox['func'] = function(func, options) {
+    return new de.Block.Function(func, options);
 };
-
-/*
-sandbox.root = function(root, options) {
-    return new Block.Root(root, options);
-};
-*/
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-module.exports = Block;
 
 // ----------------------------------------------------------------------------------------------------------------- //
 

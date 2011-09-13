@@ -1,24 +1,15 @@
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var $querystring = require('querystring');
+de.modules.ya = {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var Result = require('../../lib/result.js');
-var util = require('../../lib/util.js');
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-var ya = {};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-ya.auth = function(promise, context) {
-    var blackboxConfig = context.config.blackbox;
+de.modules.ya.auth = function(promise, context) {
+    var blackboxConfig = de.config.blackbox;
     var request = context.request;
 
     var host = blackboxConfig.host;
-    var path = blackboxConfig.path + '?' + $querystring.stringify({
+    var path = blackboxConfig.path + '?' + node.querystring.stringify({
         method: 'sessionid',
         userip: request.headers['x-real-ip'],
         sessionid: request.cookies['Session_id'],
@@ -26,18 +17,20 @@ ya.auth = function(promise, context) {
         format: 'json'
     });
 
-    util.http.get( {
-        host: host,
-        path: path,
-        port: 80
-    }, function(result) {
-        promise.resolve(result);
-    } );
+    de.http.get(
+        {
+            host: host,
+            path: path,
+            port: 80
+        }
+    )
+    .then(function(result) {
+        promise.resolve( new de.Result.Raw(result) );
+    })
+    .else_(function(error) {
+        promise.resolve( new de.Result.Error(error) );
+    });
 };
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-module.exports = ya;
 
 // ----------------------------------------------------------------------------------------------------------------- //
 

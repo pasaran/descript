@@ -1,9 +1,9 @@
 {
     common: 'common/common.jsx' +100,
 
-    answer: 42,
+    answer: 42// ,
 
-    yandex: 'http://www.yandex.ru',
+    // yandex: 'http://www.yandex.ru',
 
-    search: 'http://yandex.ru/yandsearch?'
+    // search: 'http://yandex.ru/yandsearch?'
 }

@@ -1,4 +1,4 @@
-module.exports = {
+de.config = {
 
     port: 2101,
 

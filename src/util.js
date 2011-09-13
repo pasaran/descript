@@ -1,0 +1,96 @@
+// ----------------------------------------------------------------------------------------------------------------- //
+// de.util
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.util = {};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+/**
+    @param {!Object} dest
+    @param {...!Object} srcs
+    @return {!Object}
+*/
+de.util.extends = function(dest) {
+    for (var i = 1, l = arguments.length; i < l; i++) {
+        var src = arguments[i];
+        for (var key in src) {
+            dest[key] = src[key];
+        }
+    }
+
+    return dest;
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.util.resolveFilename = function(dirname, filename) {
+    var root = de.config.rootdir;
+
+    if (/^\//.test(filename)) { // Absolute path.
+        filename = node.path.join(root, filename);
+    } else {
+        filename = node.path.resolve(dirname, filename);
+        // FIXME: Проверить, что путь не вышел за пределы root'а.
+    }
+
+    return filename;
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.util.compileString = function(string) {
+    var parts = string.split(/{(.*?)}/g);
+
+    var body = [];
+    for (var i = 0, l = parts.length; i < l; i++) {
+        var part = parts[i];
+
+        if (i % 2) {
+            var r = part.match(/^(state|config)\.(.*)$/);
+            if (r) {
+                body.push(r[1] + '["' + r[2] + '"]');
+            } else {
+                body.push('request["' + part + '"]');
+            }
+        } else {
+            body.push('"' + part + '"');
+        }
+    }
+
+    return new Function('context', 'var state = context.state, request = context.request, config = context.config; return ' + body.join('+'));
+};
+
+de.util.compileJPath = function(string) {
+    var parts = string.split(/\./g);
+
+    var body = '';
+    for (var i = 0, l = parts.length; i < l; i++) {
+        var r = parts[i].match(/^(.+?)(\[\d+\])?$/);
+        body += 'if (!r) return null;r = r["' + r[1] + '"];';
+        if (r[2]) {
+            body += 'if (!r) return null;r = r' + r[2] + ';';
+        }
+    }
+
+    return new Function('r', body + 'return r;');
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.util.parseCookies = function(cookie) {
+    var cookies = {};
+
+    var parts = cookie.split(';');
+    for (var i = 0, l = parts.length; i < l; i++) {
+        var r = parts[i].match(/^\s*([^=]+)=(.*)$/);
+        if (r) {
+            cookies[ r[1] ] = r[2];
+        }
+    }
+
+    return cookies;
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
