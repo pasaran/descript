@@ -1,39 +1,35 @@
 // ----------------------------------------------------------------------------------------------------------------- //
+// de.Options
+// ----------------------------------------------------------------------------------------------------------------- //
+
+/**
+    @typedef {
+        {
+            guard: (function()|undefined),
+            select: (!Object|undefined),
+            before: (function()|undefined),
+            after: (function()|undefined),
+            timeout: (number|undefined),
+            key: (string|undefined),
+            maxage: (number|undefined)
+        } | undefined
+    }
+*/
+de.Options;
+
+// ----------------------------------------------------------------------------------------------------------------- //
 // de.Block
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
     @constructor
+    @param {*} block
+    @param {de.Options} options
 */
-de.Block = function(block, options) {
-    /** @type {!Object} */
-    this.options;
-
-    /** @type {number} */
-    this.priority;
-
-    /** @type {(function()|undefined)} */
-    this.guard;
-
-    /** @type {(Object|undefined)} */
-    this.select;
-
-    /**@type {(function()|undefined)} */
-    this.before;
-    /**@type {(function()|undefined)} */
-    this.after;
-
-    /** @type {(number|undefined)} */
-    this.timeout;
-
-    /** @type {(string|undefined)} */
-    this.key;
-    /** @type {(number|undefined)} */
-    this.maxage;
-};
+de.Block = function(block, options) {};
 
 /**
-    @param {Object} options
+    @param {de.Options} options
 */
 de.Block.prototype.setOptions = function(options) {
     this.options = options = options || {};
@@ -74,8 +70,13 @@ de.Block.prototype.setOptions = function(options) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 de.Block._id = 0;
+
+/** @type {!Object.<string, de.Block>} */
 de.Block._blocks = {};
 
+/**
+    @return {string}
+*/
 de.Block.prototype.valueOf = function() {
     var id = this._id;
     if (!id) {
@@ -88,6 +89,10 @@ de.Block.prototype.valueOf = function() {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @param {de.Context} context
+    @return {no.Promise}
+*/
 de.Block.prototype.run = function(context) {
     var promise;
     var isCached;
@@ -172,24 +177,43 @@ de.Block.prototype.run = function(context) {
     return promise;
 };
 
+/**
+    @param {no.Promise} promise
+    @param {de.Context} context
+*/
+de.Block.prototype._run = function(promise, context) {};
+
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @return {Array.<de.Block>}
+*/
 de.Block.prototype.subblocks = function() {
     return [ this ];
 };
 
+/**
+    @return {de.Result}
+*/
 de.Block.prototype.getResult = function(result) {
     return result.results[ result.index++ ];
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @param {number} priority
+*/
 de.Block.prototype.setPriority = function(priority) {
     this.priority = priority;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @param {de.Context} context
+    @return {!Object}
+*/
 de.Block.prototype.getParams = function(context) {
     var params = this.options.params;
 
@@ -200,6 +224,10 @@ de.Block.prototype.getParams = function(context) {
 // de.Block.Array
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.Array = function(array, options) {
     this.setOptions(options);
 
@@ -212,6 +240,7 @@ de.Block.Array = function(array, options) {
 
 node.util.inherits( de.Block.Array, de.Block );
 
+/** @override */
 de.Block.Array.prototype.subblocks = function() {
     var subblocks = [];
 
@@ -223,6 +252,7 @@ de.Block.Array.prototype.subblocks = function() {
     return subblocks;
 };
 
+/** @override */
 de.Block.Array.prototype.getResult = function(result) {
     var blocks = this.blocks;
     var r = [];
@@ -234,6 +264,7 @@ de.Block.Array.prototype.getResult = function(result) {
     return new de.Result.Array(r);
 };
 
+/** @override */
 de.Block.Array.prototype.setPriority = function(priority) {
     var blocks = this.blocks;
 
@@ -246,6 +277,10 @@ de.Block.Array.prototype.setPriority = function(priority) {
 // de.Block.Object
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.Object = function(object, options) {
     this.setOptions(options);
 
@@ -260,9 +295,13 @@ de.Block.Object = function(object, options) {
 
 node.util.inherits( de.Block.Object, de.Block );
 
+/** @override */
 de.Block.Object.prototype.subblocks = de.Block.Array.prototype.subblocks;
+
+/** @override */
 de.Block.Object.prototype.setPriority = de.Block.Array.prototype.setPriority;
 
+/** @override */
 de.Block.Object.prototype.getResult = function(result) {
     var blocks = this.blocks;
     var keys = this.keys;
@@ -280,6 +319,10 @@ de.Block.Object.prototype.getResult = function(result) {
 // de.Block.File
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.File = function(filename, options) {
     this.setOptions(options);
 
@@ -288,6 +331,7 @@ de.Block.File = function(filename, options) {
 
 node.util.inherits( de.Block.File, de.Block );
 
+/** @override */
 de.Block.File.prototype._run = function(promise, context) {
     var filename = de.util.resolveFilename( this.dirname, this.filename(context) );
 
@@ -304,6 +348,10 @@ de.Block.File.prototype._run = function(promise, context) {
 // de.Block.Function
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.Function = function(func, options) {
     this.func = func;
     this.setOptions(options);
@@ -311,6 +359,7 @@ de.Block.Function = function(func, options) {
 
 node.util.inherits( de.Block.Function, de.Block );
 
+/** @override */
 de.Block.Function.prototype._run = function(promise, context) {
     var result = this.func(context);
 
@@ -324,6 +373,10 @@ de.Block.Function.prototype._run = function(promise, context) {
 // de.Block.Call
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.Call = function(call, options) {
     this.setOptions(options);
 
@@ -340,6 +393,7 @@ de.Block.Call = function(call, options) {
 
 node.util.inherits(de.Block.Call, de.Block);
 
+/** @override */
 de.Block.Call.prototype._run = function(promise, context) {
     this.call(promise, context);
 };
@@ -348,6 +402,10 @@ de.Block.Call.prototype._run = function(promise, context) {
 // de.Block.Include
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.Include = function(filename, options) {
     this.setOptions(options);
 
@@ -356,8 +414,12 @@ de.Block.Include = function(filename, options) {
 
 node.util.inherits(de.Block.Include, de.Block);
 
+/**
+    @type {!Object.<string, de.Block.Root>}
+*/
 de.Block.Include._cache = {};
 
+/** @override */
 de.Block.Include.prototype._run = function(promise, context) {
     var filename = de.util.resolveFilename( this.dirname, this.filename(context) );
 
@@ -402,6 +464,10 @@ de.Block.Include.prototype._run = function(promise, context) {
 // de.Block.Http
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.Http = function(url, options) {
     this.setOptions(options);
 
@@ -415,6 +481,7 @@ de.Block.Http = function(url, options) {
 
 node.util.inherits(de.Block.Http, de.Block);
 
+/** @override */
 de.Block.Http.prototype._run = function(promise, context) {
     var options = de.http.url2options(
         this.url(context),
@@ -435,6 +502,10 @@ de.Block.Http.prototype._run = function(promise, context) {
 // de.Block.Value
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.Value = function(value, options) {
     this.setOptions(options);
     this.value = value;
@@ -442,6 +513,7 @@ de.Block.Value = function(value, options) {
 
 node.util.inherits(de.Block.Value, de.Block);
 
+/** @override */
 de.Block.Value.prototype._run = function(promise, params) {
     promise.resolve( new de.Result.Value(this.value) );
 };
@@ -450,6 +522,10 @@ de.Block.Value.prototype._run = function(promise, params) {
 // de.Block.Root
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Block}
+*/
 de.Block.Root = function(root, options) {
     this.setOptions(options);
 
@@ -469,6 +545,7 @@ de.Block.Root = function(root, options) {
 
 node.util.inherits( de.Block.Root, de.Block );
 
+/** @override */
 de.Block.Root.prototype._run = function(promise, context) {
     var that = this;
 
@@ -511,6 +588,10 @@ de.Block.Root.prototype._run = function(promise, context) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @param {*} block
+    @param {de.Options|undefined} options
+*/
 de.Block.compile = function(block, options) {
 
     options = options || {};
