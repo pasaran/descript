@@ -4,6 +4,8 @@
 
 de.Result = function() {};
 
+de.Result._cache = {};
+
 de.Result.prototype.formatted = function() {
     return JSON.stringify( this.object(), null, '    ' );
 };

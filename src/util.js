@@ -94,3 +94,41 @@ de.util.parseCookies = function(cookie) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+de.util.duration = function(s) {
+    if (typeof s === 'number') {
+        return s;
+    }
+
+    var parts = s.split(/(\d+)(year|y|month|m|day|d|hour|h|H|min|M|sec|s|S)/);
+    var d = 0;
+
+    for (var i = 0, l = parts.length; i < l; i += 3) {
+        var n = +parts[i + 1];
+
+        switch (parts[i + 2]) {
+            case 'years', 'year', 'y', 'Y':
+                d += n * (60 * 60 * 24 * 365);
+                break;
+            case 'months', 'month', 'm':
+                d += n * (60 * 60 * 24 * 31);
+                break;
+            case 'days', 'day', 'd', 'D':
+                d += n * (60 * 60 * 24);
+                break;
+            case 'hours', 'hour', 'h', 'H':
+                d += n * (60 * 60);
+                break;
+            case 'mins', 'min', 'M':
+                d += n * (60);
+                break;
+            case 'secs', 'sec', 's', 'S':
+                d += n;
+                break;
+        }
+    }
+
+    return d * 1000;
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+

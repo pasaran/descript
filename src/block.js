@@ -33,6 +33,11 @@ de.Block.prototype.setOptions = function(options) {
     this.after = options.after;
 
     this.timeout = options.timeout;
+
+    if (options.key && options.maxage !== undefined) {
+        this.key = options.key;
+        this.maxage = de.util.duration( options.maxage );
+    }
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -64,20 +69,42 @@ de.Block.prototype.run = function(context) {
     if (guard && !guard(context)) {
         promise.resolve( new de.Result.Value(null) ); // FIXME: Или же возвращать ошибку.
     } else {
-        var timeout;
-        if (this.timeout) {
-            promise.then(function() {
-                if (timeout) {
-                    clearTimeout(timeout);
+        var key = this.key;
+        var result;
+        if (key) { // Кэшируем результат.
+            var cached = de.Result._cache[key];
+            if (cached && cached.timestamp + this.maxage > context.now) {
+                result = cached.result;
+            }
+        }
+
+        if (result) {
+            promise.resolve(result);
+        } else {
+            promise.then(function(result) {
+                if (!(result instanceof de.Result.Error)) {
+                    de.Result._cache[key] = {
+                        timestamp: context.now,
+                        result: result
+                    };
                 }
             });
 
-            timeout = setTimeout(function() {
-                promise.resolve( new de.Result.Error({
-                    id: 'TIMEOUT',
-                    message: 'Timeout' // FIXME: Вменяемый текст.
-                }) );
-            }, this.timeout);
+            var timeout;
+            if (this.timeout) {
+                promise.then(function() {
+                    if (timeout) {
+                        clearTimeout(timeout);
+                    }
+                });
+
+                timeout = setTimeout(function() {
+                    promise.resolve( new de.Result.Error({
+                        id: 'TIMEOUT',
+                        message: 'Timeout' // FIXME: Вменяемый текст.
+                    }) );
+                }, this.timeout);
+            }
         }
 
         var select = this.select;
