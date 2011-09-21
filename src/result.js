@@ -2,10 +2,16 @@
 // de.Result
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+*/
 de.Result = function() {};
 
 de.Result._cache = {};
 
+/**
+    @return {string}
+*/
 de.Result.prototype.formatted = function() {
     return JSON.stringify( this.object(), null, '    ' );
 };

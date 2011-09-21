@@ -2,8 +2,39 @@
 // de.Block
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.Block = function(block, options) {};
+/**
+    @constructor
+*/
+de.Block = function(block, options) {
+    /** @type {!Object} */
+    this.options;
 
+    /** @type {number} */
+    this.priority;
+
+    /** @type {(function()|undefined)} */
+    this.guard;
+
+    /** @type {(Object|undefined)} */
+    this.select;
+
+    /**@type {(function()|undefined)} */
+    this.before;
+    /**@type {(function()|undefined)} */
+    this.after;
+
+    /** @type {(number|undefined)} */
+    this.timeout;
+
+    /** @type {(string|undefined)} */
+    this.key;
+    /** @type {(number|undefined)} */
+    this.maxage;
+};
+
+/**
+    @param {Object} options
+*/
 de.Block.prototype.setOptions = function(options) {
     this.options = options = options || {};
 
