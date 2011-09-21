@@ -109,6 +109,7 @@ node.util.inherits( de.Result.Array, de.Result );
 
 de.Result.Array.prototype.write = function(stream) {
     stream.write('[');
+    var result = this.result;
     for (var i = 0, l = result.length; i < l; i++) {
         if (i) {
             stream.write(',');
@@ -167,6 +168,7 @@ node.util.inherits( de.Result.Object, de.Result );
 de.Result.Object.prototype.write = function(stream) {
     stream.write('{');
     var i = 0;
+    var result = this.result;
     for (var key in result) {
         if (i++) {
             stream.write(',');
