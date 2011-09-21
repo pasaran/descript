@@ -1,4 +1,8 @@
 // ----------------------------------------------------------------------------------------------------------------- //
+
+var de = de || {};
+
+// ----------------------------------------------------------------------------------------------------------------- //
 // de.util
 // ----------------------------------------------------------------------------------------------------------------- //
 
@@ -99,29 +103,23 @@ de.util.duration = function(s) {
         return s;
     }
 
-    var parts = s.split(/(\d+)(year|y|month|m|day|d|hour|h|H|min|M|sec|s|S)/);
+    var parts = s.split(/(\d+)([dhms])/);
     var d = 0;
 
     for (var i = 0, l = parts.length; i < l; i += 3) {
         var n = +parts[i + 1];
 
         switch (parts[i + 2]) {
-            case 'years', 'year', 'y', 'Y':
-                d += n * (60 * 60 * 24 * 365);
-                break;
-            case 'months', 'month', 'm':
-                d += n * (60 * 60 * 24 * 31);
-                break;
-            case 'days', 'day', 'd', 'D':
+            case 'd':
                 d += n * (60 * 60 * 24);
                 break;
-            case 'hours', 'hour', 'h', 'H':
+            case 'h':
                 d += n * (60 * 60);
                 break;
-            case 'mins', 'min', 'M':
+            case 'm':
                 d += n * (60);
                 break;
-            case 'secs', 'sec', 's', 'S':
+            case 's':
                 d += n;
                 break;
         }

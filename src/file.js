@@ -6,13 +6,13 @@ de.file = {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.file._readingCache = {};
+de.file._cache = {};
 
 de.file.get = function(filename) {
-    var promise = de.file._readingCache[filename];
+    var promise = de.file._cache[filename];
 
     if (!promise) {
-        promise = de.file._readingCache[filename] = new no.Promise();
+        promise = de.file._cache[filename] = new no.Promise();
 
         node.fs.readFile(filename, function(error, content) {
             if (error) {
@@ -21,7 +21,7 @@ de.file.get = function(filename) {
                     message: error.message
                 });
             } else {
-                promise.resolve([ content ]);
+                promise.resolve(content);
             }
         });
     }

@@ -58,53 +58,60 @@ de.Block.prototype.valueOf = function() {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 de.Block.prototype.run = function(context) {
-    var promise = new no.Promise();
+    var promise;
+    var isCached;
 
-    var before = this.before;
+    var before = this.before; // FIXME: На закэшированные блоки before не окажет никакого влияния.
     if (before) {
         before(context);
     }
 
     var guard = this.guard;
     if (guard && !guard(context)) {
+        promise = new no.Promise();
         promise.resolve( new de.Result.Value(null) ); // FIXME: Или же возвращать ошибку.
+
     } else {
         var key = this.key;
-        var result;
-        if (key) { // Кэшируем результат.
+        if (key) {
             var cached = de.Result._cache[key];
-            if (cached && cached.timestamp + this.maxage > context.now) {
-                result = cached.result;
+            if ( cached && (cached.timestamp + this.maxage > context.now) ) {
+                promise = cached.promise;
+                isCached = true;
             }
         }
 
-        if (result) {
-            promise.resolve(result);
-        } else {
-            promise.then(function(result) {
-                if (!(result instanceof de.Result.Error)) {
-                    de.Result._cache[key] = {
-                        timestamp: context.now,
-                        result: result
-                    };
+        if (!promise) {
+            promise = new no.Promise();
+
+            if (key) {
+                de.Result._cache[key] = {
+                    timestamp: context.now,
+                    promise: promise
+                };
+
+                promise.then(function(result) {
+                    if (result instanceof de.Result.Error) {
+                        delete de.Result._cache[key];
+                    }
+                });
+            }
+        }
+
+        var timeout;
+        if (this.timeout) {
+            promise.then(function() {
+                if (timeout) {
+                    clearTimeout(timeout);
                 }
             });
 
-            var timeout;
-            if (this.timeout) {
-                promise.then(function() {
-                    if (timeout) {
-                        clearTimeout(timeout);
-                    }
-                });
-
-                timeout = setTimeout(function() {
-                    promise.resolve( new de.Result.Error({
-                        id: 'TIMEOUT',
-                        message: 'Timeout' // FIXME: Вменяемый текст.
-                    }) );
-                }, this.timeout);
-            }
+            timeout = setTimeout(function() {
+                promise.resolve( new de.Result.Error({
+                    id: 'TIMEOUT',
+                    message: 'Timeout' // FIXME: Вменяемый текст.
+                }) );
+            }, this.timeout);
         }
 
         var select = this.select;
@@ -126,7 +133,9 @@ de.Block.prototype.run = function(context) {
             });
         }
 
-        this._run(promise, context);
+        if (!isCached) {
+            this._run(promise, context);
+        }
     }
 
     return promise;
@@ -253,7 +262,7 @@ de.Block.File.prototype._run = function(promise, context) {
 
     de.file.get(filename)
         .then(function(result) {
-            promise.resolve( new de.Result.Raw(result) );
+            promise.resolve( new de.Result.Raw([ result ], true) ); // FIXME: Учесть options.dataType.
         })
         .else_(function(error) {
             promise.resolve( new de.Result.Error(error) );
@@ -334,8 +343,7 @@ de.Block.Include.prototype._run = function(promise, context) {
     de.file.get(filename)
         .then(function(result) {
             try {
-                var content = result.join('');
-                var include = node.vm.runInNewContext( '(' + content + ')', de.sandbox, filename);
+                var include = node.vm.runInNewContext( '(' + result + ')', de.sandbox, filename);
 
                 var dirname = node.path.dirname(filename);
 
@@ -384,7 +392,7 @@ de.Block.Http.prototype._run = function(promise, context) {
 
     de.http.get(options)
         .then(function(result) {
-            promise.resolve( new de.Result.Raw(result) ); // FIXME: Учесть options.dataType.
+            promise.resolve( new de.Result.Raw(result, true) ); // FIXME: Учесть options.dataType.
         })
         .else_(function(error) {
             promise.resolve( new de.Result.Error(error) );

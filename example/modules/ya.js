@@ -25,7 +25,7 @@ de.modules.ya.auth = function(promise, context) {
         }
     )
     .then(function(result) {
-        promise.resolve( new de.Result.Raw(result) );
+        promise.resolve( new de.Result.Raw(result, true) );
     })
     .else_(function(error) {
         promise.resolve( new de.Result.Error(error) );

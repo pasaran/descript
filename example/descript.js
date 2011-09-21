@@ -32,7 +32,9 @@ var server = node.http.createServer( function (req, res) {
         }
 
         // context.response.end( result.string() );
-        context.response.end( result.formatted() ); // FIXME: Для красоты временно форматируем ответ.
+        // context.response.end( result.formatted() ); // FIXME: Для красоты временно форматируем ответ.
+        result.write(res);
+        res.end();
     });
 });
 
