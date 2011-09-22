@@ -37,7 +37,7 @@ de.Block.prototype.setOptions = function(options) {
 
     this.priority = 0;
 
-    this.dirname = options.dirname || de.config.rootdir;
+    this.dirname = options.dirname || de.config['rootdir'];
 
     var guard = options.guard;
     if (guard) {

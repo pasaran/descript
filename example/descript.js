@@ -10,11 +10,11 @@ program
 
 var cwd = process.cwd();
 
-de.config.rootdir = node.path.resolve( cwd, program.rootdir );
+de.config['rootdir'] = node.path.resolve( cwd, program['rootdir'] );
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-var server = node.http.createServer( function (req, res) {
+var server = node.http.createServer( function (/** @type {nodeServerRequest} */ req, /** @type {nodeServerResponse} */ res) {
     res.setHeader( 'Content-Type', 'text/javascript; charset: utf-8' );
 
     var context = new de.Context(req, res, de.config);

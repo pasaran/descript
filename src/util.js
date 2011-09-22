@@ -25,7 +25,7 @@ de.util.extend = function(dest, srcs) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 de.util.resolveFilename = function(dirname, filename) {
-    var root = de.config.rootdir;
+    var root = de.config['rootdir'];
 
     if (/^\//.test(filename)) { // Absolute path.
         filename = node.path.join(root, filename);

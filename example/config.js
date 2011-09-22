@@ -1,14 +1,14 @@
 de.config = {
 
-    port: 2101,
+    'port': 2101,
 
-    blackbox: {
-        host: 'blackbox-mimino.yandex.net',
-        path: '/blackbox',
-        domain: 'fotki.yandex.ru'
+    'blackbox': {
+        'host': 'blackbox-mimino.yandex.net',
+        'path': '/blackbox',
+        'domain': 'fotki.yandex.ru'
     },
 
-    defaultModule: 'fotki'
+    'defaultModule': 'fotki'
 
 };
 
