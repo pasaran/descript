@@ -12,7 +12,7 @@ de.modules.ya.auth = function(promise, context) {
     var path = blackboxConfig.path + '?' + node.querystring.stringify({
         method: 'sessionid',
         userip: request.headers['x-real-ip'],
-        sessionid: request.cookies['Session_id'],
+        sessionid: request.cookies['Session_id'] || '',
         host: blackboxConfig.domain,
         format: 'json'
     });

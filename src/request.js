@@ -1,3 +1,7 @@
+/**
+    @constructor
+    @param {!Object} request
+*/
 de.Request = function(request) {
     this.headers = request.headers;
     this.cookies = de.util.parseCookies( this.headers['cookie'] || '' );

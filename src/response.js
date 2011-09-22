@@ -2,6 +2,10 @@
 // Response
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @param {!Object} response
+*/
 de.Response = function(response) {
     this._response = response;
 

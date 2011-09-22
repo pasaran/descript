@@ -4,10 +4,24 @@
 
 /**
     @constructor
+    @param {*} result
 */
-de.Result = function() {};
+de.Result = function(result) {};
 
-de.Result._cache = {};
+/**
+    @return {string}
+*/
+de.Result.prototype.string = function() {};
+
+/**
+    @return {Object}
+*/
+de.Result.prototype.object = function() {};
+
+/**
+    @param {Stream} stream
+*/
+de.Result.prototype.write = function(stream) {};
 
 /**
     @return {string}
@@ -17,11 +31,19 @@ de.Result.prototype.formatted = function() {
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
+
+/**
+    @type {Object.<string, de.Result>}
+*/
+de.Result._cache = {};
+
+// ----------------------------------------------------------------------------------------------------------------- //
 // de.Result.Raw
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
     @constructor
+    @extends {de.Result}
     @param {Array.<Buffer>} result
     @param {boolean|undefined} isJSON
 */
@@ -32,6 +54,7 @@ de.Result.Raw = function(result, isJSON) {
 
 node.util.inherits( de.Result.Raw, de.Result );
 
+/** @override */
 de.Result.Raw.prototype.write = function(stream) {
     var result = this.result;
     for (var i = 0, l = result.length; i < l; i++) {
@@ -39,6 +62,7 @@ de.Result.Raw.prototype.write = function(stream) {
     }
 };
 
+/** @override */
 de.Result.Raw.prototype.string = function() {
     var s = this._string;
 
@@ -49,6 +73,7 @@ de.Result.Raw.prototype.string = function() {
     return s;
 };
 
+/** @override */
 de.Result.Raw.prototype.object = function() {
     var o = this._object;
 
@@ -63,16 +88,22 @@ de.Result.Raw.prototype.object = function() {
 // de.Result.Value
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @param {*} result
+*/
 de.Result.Value = function(result) {
     this.result = result;
 };
 
 node.util.inherits( de.Result.Value, de.Result );
 
+/** @override */
 de.Result.Value.prototype.write = function(stream) {
     stream.write( this.string() );
 };
 
+/** @override */
 de.Result.Value.prototype.string = function() {
     var s = this._string;
 
@@ -83,6 +114,7 @@ de.Result.Value.prototype.string = function() {
     return s;
 };
 
+/** @override */
 de.Result.Value.prototype.object = function() {
     return this.result;
 };
@@ -91,14 +123,23 @@ de.Result.Value.prototype.object = function() {
 // de.Result.Error
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Result.Value}
+    @param {!Object} error
+*/
 de.Result.Error = function(error) {
     this.result = {
-        error: error || {}
+        error: error
     };
 };
 
 node.util.inherits( de.Result.Error, de.Result.Value );
 
+/**
+    @param {string} field
+    @return {*}
+*/
 de.Result.Error.prototype.get = function(field) {
     return this.result.error[field];
 };
@@ -107,12 +148,18 @@ de.Result.Error.prototype.get = function(field) {
 // de.Result.Array
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Result}
+    @param {Array} result
+*/
 de.Result.Array = function(result) {
     this.result = result;
 };
 
 node.util.inherits( de.Result.Array, de.Result );
 
+/** @override */
 de.Result.Array.prototype.write = function(stream) {
     stream.write('[');
     var result = this.result;
@@ -125,6 +172,7 @@ de.Result.Array.prototype.write = function(stream) {
     stream.write(']');
 };
 
+/** @override */
 de.Result.Array.prototype.string = function() {
     var s = this._string;
 
@@ -146,6 +194,7 @@ de.Result.Array.prototype.string = function() {
     return s;
 };
 
+/** @override */
 de.Result.Array.prototype.object = function() {
     var o = this._object;
 
@@ -165,12 +214,18 @@ de.Result.Array.prototype.object = function() {
 // de.Result.Object
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @constructor
+    @extends {de.Result}
+    @param {!Object} result
+*/
 de.Result.Object = function(result) {
     this.result = result;
 };
 
 node.util.inherits( de.Result.Object, de.Result );
 
+/** @override */
 de.Result.Object.prototype.write = function(stream) {
     stream.write('{');
     var i = 0;
@@ -185,6 +240,7 @@ de.Result.Object.prototype.write = function(stream) {
     stream.write('}');
 };
 
+/** @override */
 de.Result.Object.prototype.string = function() {
     var s = this._string;
 
@@ -207,6 +263,7 @@ de.Result.Object.prototype.string = function() {
     return s;
 };
 
+/** @override */
 de.Result.Object.prototype.object = function() {
     var o = this._object;
 

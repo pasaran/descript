@@ -5,6 +5,7 @@
 /**
     @typedef {
         {
+            dirname: {string|undefined},
             guard: (function()|undefined),
             select: (!Object|undefined),
             before: (function()|undefined),
@@ -32,7 +33,7 @@ de.Block = function(block, options) {};
     @param {de.Options} options
 */
 de.Block.prototype.setOptions = function(options) {
-    this.options = options = options || {};
+    options = options || {};
 
     this.priority = 0;
 
@@ -206,18 +207,6 @@ de.Block.prototype.getResult = function(result) {
 */
 de.Block.prototype.setPriority = function(priority) {
     this.priority = priority;
-};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-/**
-    @param {de.Context} context
-    @return {!Object}
-*/
-de.Block.prototype.getParams = function(context) {
-    var params = this.options.params;
-
-    return (params) ? params(context) : context.request.query;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -485,7 +474,7 @@ node.util.inherits(de.Block.Http, de.Block);
 de.Block.Http.prototype._run = function(promise, context) {
     var options = de.http.url2options(
         this.url(context),
-        (this.extend) ? this.getParams(context) : null
+        (this.extend) ? context.request.query : null
     );
 
     de.http.get(options)
