@@ -6,12 +6,17 @@ de.http = {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
+/**
+    @param {string} url
+    @param {Object=} params
+    @return {!Object}
+*/
 de.http.url2options = function(url, params) {
     url = node.url.parse(url, true);
 
     var query = url.query || {};
     if (params) {
-        de.util.extends(query, params);
+        de.util.extend(query, params);
     }
 
     return {

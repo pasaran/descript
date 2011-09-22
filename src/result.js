@@ -19,7 +19,7 @@ de.Result.prototype.string = function() {};
 de.Result.prototype.object = function() {};
 
 /**
-    @param {Stream} stream
+    @param {node.Stream} stream
 */
 de.Result.prototype.write = function(stream) {};
 
@@ -33,7 +33,7 @@ de.Result.prototype.formatted = function() {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
-    @type {Object.<string, de.Result>}
+    @type {Object.<string, { timestamp: number, promise: no.Promise }>}
 */
 de.Result._cache = {};
 
@@ -44,7 +44,7 @@ de.Result._cache = {};
 /**
     @constructor
     @extends {de.Result}
-    @param {Array.<Buffer>} result
+    @param {Array.<node.Buffer>} result
     @param {boolean|undefined} isJSON
 */
 de.Result.Raw = function(result, isJSON) {
@@ -90,6 +90,7 @@ de.Result.Raw.prototype.object = function() {
 
 /**
     @constructor
+    @extends {de.Result}
     @param {*} result
 */
 de.Result.Value = function(result) {
@@ -179,7 +180,7 @@ de.Result.Array.prototype.string = function() {
     if (s === undefined) {
         var result = this.result;
 
-        var s = '[';
+        s = '[';
         for (var i = 0, l = result.length; i < l; i++) {
             if (i) {
                 s += ',';
@@ -247,7 +248,7 @@ de.Result.Object.prototype.string = function() {
     if (s === undefined) {
         var result = this.result;
 
-        var s = '{';
+        s = '{';
         var i = 0;
         for (var key in result) {
             if (i++) {

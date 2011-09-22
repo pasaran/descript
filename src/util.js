@@ -11,7 +11,7 @@ de.util = {};
     @param {...!Object} srcs
     @return {!Object}
 */
-de.util.extends = function(dest) {
+de.util.extend = function(dest, srcs) {
     for (var i = 1, l = arguments.length; i < l; i++) {
         var src = arguments[i];
         for (var key in src) {

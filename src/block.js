@@ -5,7 +5,7 @@
 /**
     @typedef {
         {
-            dirname: {string|undefined},
+            dirname: (string|undefined),
             guard: (function()|undefined),
             select: (!Object|undefined),
             before: (function()|undefined),
@@ -13,7 +13,7 @@
             timeout: (number|undefined),
             key: (string|undefined),
             maxage: (number|undefined)
-        } | undefined
+        } | !Object | undefined
     }
 */
 de.Options;
@@ -25,15 +25,15 @@ de.Options;
 /**
     @constructor
     @param {*} block
-    @param {de.Options} options
+    @param {de.Options=} options
 */
 de.Block = function(block, options) {};
 
 /**
-    @param {de.Options} options
+    @param {de.Options=} options
 */
 de.Block.prototype.setOptions = function(options) {
-    options = options || {};
+    this.options = options = options || {};
 
     this.priority = 0;
 
@@ -215,6 +215,8 @@ de.Block.prototype.setPriority = function(priority) {
 
 /**
     @constructor
+    @param {Array} array
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.Array = function(array, options) {
@@ -268,6 +270,8 @@ de.Block.Array.prototype.setPriority = function(priority) {
 
 /**
     @constructor
+    @param {Object} object
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.Object = function(object, options) {
@@ -310,6 +314,8 @@ de.Block.Object.prototype.getResult = function(result) {
 
 /**
     @constructor
+    @param {string} filename
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.File = function(filename, options) {
@@ -339,6 +345,8 @@ de.Block.File.prototype._run = function(promise, context) {
 
 /**
     @constructor
+    @param {function(de.Context)} func
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.Function = function(func, options) {
@@ -364,6 +372,8 @@ de.Block.Function.prototype._run = function(promise, context) {
 
 /**
     @constructor
+    @param {string} call
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.Call = function(call, options) {
@@ -376,7 +386,7 @@ de.Block.Call = function(call, options) {
 
     module = de.modules[module];
 
-    var call = module[method];
+    call = module[method];
     this.call = (typeof call === 'function') ? call : module;
 };
 
@@ -393,6 +403,8 @@ de.Block.Call.prototype._run = function(promise, context) {
 
 /**
     @constructor
+    @param {string} filename
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.Include = function(filename, options) {
@@ -429,7 +441,7 @@ de.Block.Include.prototype._run = function(promise, context) {
 
                 var dirname = node.path.dirname(filename);
 
-                var options = de.util.extends( {}, that.options, { dirname: dirname } );
+                var options = de.util.extend( {}, that.options, { dirname: dirname } );
                 var block = de.Block.Include._cache[filename] = new de.Block.Root(include, options);
 
                 block.run(context).then(function(result) {
@@ -455,6 +467,8 @@ de.Block.Include.prototype._run = function(promise, context) {
 
 /**
     @constructor
+    @param {string} url
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.Http = function(url, options) {
@@ -493,6 +507,8 @@ de.Block.Http.prototype._run = function(promise, context) {
 
 /**
     @constructor
+    @param {*} value
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.Value = function(value, options) {
@@ -513,6 +529,8 @@ de.Block.Value.prototype._run = function(promise, params) {
 
 /**
     @constructor
+    @param {*} root
+    @param {de.Options=} options
     @extends {de.Block}
 */
 de.Block.Root = function(root, options) {
@@ -579,7 +597,7 @@ de.Block.Root.prototype._run = function(promise, context) {
 
 /**
     @param {*} block
-    @param {de.Options|undefined} options
+    @param {de.Options=} options
 */
 de.Block.compile = function(block, options) {
 
