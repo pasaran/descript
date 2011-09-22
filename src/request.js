@@ -1,6 +1,6 @@
 /**
     @constructor
-    @param {!Object} request
+    @param {nodeServerRequest} request
 */
 de.Request = function(request) {
     this.headers = request.headers;
@@ -8,7 +8,7 @@ de.Request = function(request) {
 
     var url = node.url.parse( request.url, true );
 
-    this.query = url.query;
+    this['query'] = url.query;
     this.path = url.pathname;
 };
 

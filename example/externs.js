@@ -42,6 +42,9 @@ nodeFs.readFile;
 /** @typedef {Object} */
 var nodeHttp = {};
 
+/** @type {function()} */
+nodeHttp.request;
+
 /** @typedef {Object} */
 nodeHttp.ServerResponse;
 

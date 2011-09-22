@@ -17,8 +17,8 @@ de.file.get = function(filename) {
         node.fs.readFile(filename, function(error, content) {
             if (error) {
                 promise.reject({
-                    id: 'FILE_OPEN_ERROR',
-                    message: error.message
+                    'id': 'FILE_OPEN_ERROR',
+                    'message': error.message
                 });
             } else {
                 promise.resolve(content);

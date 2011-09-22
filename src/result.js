@@ -131,7 +131,7 @@ de.Result.Value.prototype.object = function() {
 */
 de.Result.Error = function(error) {
     this.result = {
-        error: error
+        'error': error
     };
 };
 

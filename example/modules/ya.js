@@ -9,15 +9,15 @@ de.modules.ya = {};
     @param {de.Context} context
 */
 de.modules.ya.auth = function(promise, context) {
-    var blackboxConfig = de.config.blackbox;
-    var request = context.request;
+    var blackboxConfig = de.config['blackbox'];
+    var request = context['request'];
 
-    var host = blackboxConfig.host;
-    var path = blackboxConfig.path + '?' + node.querystring.stringify({
+    var host = blackboxConfig['host'];
+    var path = blackboxConfig['path'] + '?' + node.querystring.stringify({
         'method': 'sessionid',
         'userip': request.headers['x-real-ip'],
         'sessionid': request.cookies['Session_id'] || '',
-        'host': blackboxConfig.domain,
+        'host': blackboxConfig['domain'],
         'format': 'json'
     });
 

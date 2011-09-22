@@ -154,7 +154,7 @@ de.Block.prototype.run = function(context) {
         var select = this.select;
         if (select) {
             promise.then(function(result) {
-                var state = context.state;
+                var state = context['state'];
 
                 result = result.object();
                 for (var key in select) {
@@ -488,7 +488,7 @@ node.util.inherits(de.Block.Http, de.Block);
 de.Block.Http.prototype._run = function(promise, context) {
     var options = de.http.url2options(
         this.url(context),
-        (this.extend) ? context.request.query : null
+        (this.extend) ? context['request'].query : null
     );
 
     de.http.get(options)

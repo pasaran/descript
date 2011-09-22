@@ -4,7 +4,7 @@
 
 /**
     @constructor
-    @param {!Object} response
+    @param {nodeServerResponse} response
 */
 de.Response = function(response) {
     this._response = response;

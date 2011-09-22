@@ -20,23 +20,23 @@ de.http.url2options = function(url, params) {
     }
 
     return {
-        host: url.hostname,
-        path: node.url.format({
-            pathname: url.pathname,
-            query: query
+        'host': url.hostname,
+        'path': node.url.format({
+            'pathname': url.pathname,
+            'query': query
         }),
-        port: url.port || 80
+        'port': url.port || 80
     };
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 de.http.errorMessages = {
-    400: 'Bad Request',
-    403: 'Forbidden',
-    404: 'Not Found',
-    500: 'Internal Server Error',
-    503: 'Service Unavailable'
+    '400': 'Bad Request',
+    '403': 'Forbidden',
+    '404': 'Not Found',
+    '500': 'Internal Server Error',
+    '503': 'Service Unavailable'
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -62,7 +62,7 @@ de.http._get = function(options, promise, count) {
             case 302:
                 if (count > 3) { // FIXME: MAX_REDIRECTS.
                     return promise.reject({
-                        id: 'HTTP_TOO_MANY_REDIRECTS'
+                        'id': 'HTTP_TOO_MANY_REDIRECTS'
                     });
                 }
 
@@ -79,8 +79,8 @@ de.http._get = function(options, promise, count) {
             case 500:
             case 503:
                 error = {
-                    id: 'HTTP_' + status,
-                    message: de.http.errorMessages[status]
+                    'id': 'HTTP_' + status,
+                    'message': de.http.errorMessages[status]
                 };
                 break;
 
@@ -99,8 +99,8 @@ de.http._get = function(options, promise, count) {
             });
             res.on('close', function(error) {
                 promise.reject({
-                    id: 'HTTP_CONNECTION_CLOSED',
-                    message: error.message
+                    'id': 'HTTP_CONNECTION_CLOSED',
+                    'message': error.message
                 });
             });
 
@@ -109,8 +109,8 @@ de.http._get = function(options, promise, count) {
 
     req.on('error', function(error) {
         promise.reject({
-            id: 'HTTP_UNKNOWN_ERROR',
-            message: error.message
+            'id': 'HTTP_UNKNOWN_ERROR',
+            'message': error.message
         });
     });
 

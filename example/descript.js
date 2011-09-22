@@ -19,7 +19,7 @@ var server = node.http.createServer( function (/** @type {nodeServerRequest} */ 
 
     var context = new de.Context(req, res, de.config);
 
-    var path = context.request.path;
+    var path = context['request'].path;
     if (path === '/') {
         path = '/index.jsx';
     }
