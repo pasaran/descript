@@ -29,7 +29,7 @@ de.Response.prototype.setRedirect = function(location) {
     this.location = location;
 };
 
-de.Response.prototype.end = function(data) {
+de.Response.prototype.end = function(result) {
     var response = this._response;
 
     var headers = this.headers;
@@ -52,7 +52,8 @@ de.Response.prototype.end = function(data) {
     }
 
     response.statusCode = this.status || 200;
-    response.end(data);
+    result.write(response);
+    response.end();
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //

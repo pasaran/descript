@@ -5,7 +5,7 @@ var program = require('../deps/commander.js');
 
 program
     .version('0.0.1')
-    .option('-r, --rootdir <dir>', 'Root directory', '.')
+    .option('-r, --rootdir <dir>', 'Root directory', './pages')
     .parse(process.argv);
 
 var cwd = process.cwd();
@@ -34,8 +34,7 @@ var server = node.http.createServer( function (/** @type {nodeServerRequest} */ 
 
         // context.response.end( result.string() );
         // context.response.end( result.formatted() ); // FIXME: Для красоты временно форматируем ответ.
-        result.write(res);
-        res.end();
+        context.response.end(result);
     });
 });
 
