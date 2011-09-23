@@ -1,6 +1,6 @@
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.modules.ya = {};
+de.modules['ya'] = {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
@@ -8,7 +8,7 @@ de.modules.ya = {};
     @param {no.Promise} promise
     @param {de.Context} context
 */
-de.modules.ya.auth = function(promise, context) {
+de.modules['ya']['auth'] = function(promise, context) {
     var blackboxConfig = de.config['blackbox'];
     var request = context['request'];
 
