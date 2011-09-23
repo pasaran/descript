@@ -14,3 +14,6 @@ cat ../deps/noscript/promise.js \
     config.js \
     descript.js > _descript.js
 
+# java -jar /home/nop/bin/compiler.jar --js=_descript.js --compilation_level=ADVANCED_OPTIMIZATIONS --warning_level=VERBOSE --externs=externs.js > __descript.js
+
+
