@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat ../deps/noscript/promise.js \
+cat ../deps/noscript.js \
     ../src/de.js \
     ../src/util.js \
     ../src/file.js \

@@ -13,7 +13,7 @@
             timeout: (number|undefined),
             key: (string|undefined),
             maxage: (number|undefined)
-        } | !Object | undefined
+        } | undefined
     }
 */
 de.Options;
@@ -424,7 +424,7 @@ de.Block.Include._cache = {};
 de.Block.Include.prototype._run = function(promise, context) {
     var filename = de.util.resolveFilename( this.dirname, this.filename(context) );
 
-    var block = de.Block.Include._cache[filename];
+    var block = de.Block.Include._cache[ filename ];
     if (block) {
         block.run(context).then(function(result) {
             promise.resolve(result);
@@ -442,7 +442,7 @@ de.Block.Include.prototype._run = function(promise, context) {
                 var dirname = node.path.dirname(filename);
 
                 var options = de.util.extend( {}, that.options, { dirname: dirname } );
-                var block = de.Block.Include._cache[filename] = new de.Block.Root(include, options);
+                var block = de.Block.Include._cache[ filename ] = new de.Block.Root(include, options);
 
                 block.run(context).then(function(result) {
                     promise.resolve(result);
@@ -458,8 +458,11 @@ de.Block.Include.prototype._run = function(promise, context) {
         .else_(function(error) {
             promise.resolve( new de.Result.Error(error) );
         });
-
 };
+
+no.events.bind('file-changed', function(e, filename) {
+    delete de.Block.Include._cache[ filename ];
+});
 
 // ----------------------------------------------------------------------------------------------------------------- //
 // de.Block.Http

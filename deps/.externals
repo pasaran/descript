@@ -1,6 +1,5 @@
-# TODO: Сделать скрипт, который будет читать этот файл, выкачивать нужные файлы
-#       и раскладывать их в соответствующие места.
+# Внешние зависимости.
 
-noscript/promise.js     https://raw.github.com/pasaran/noscript/0.0.2/lib/promise.js                0.0.2
+noscript.js             https://raw.github.com/pasaran/noscript/0.0.5/noscript.js                   0.0.5
 commander.js            https://raw.github.com/visionmedia/commander.js/0.1.0/lib/commander.js      0.1.0
 
