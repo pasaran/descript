@@ -1,1 +1,1 @@
-noscript-0.0.5.js
+noscript-0.0.6.js
