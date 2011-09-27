@@ -34,7 +34,7 @@ var server = node.http.createServer( function (/** @type {nodeServerRequest} */ 
 
         // context.response.end( result.string() );
         // context.response.end( result.formatted() ); // FIXME: Для красоты временно форматируем ответ.
-        context.response.end(result);
+        context['response'].end(result);
     });
 });
 

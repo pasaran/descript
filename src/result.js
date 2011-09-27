@@ -14,7 +14,7 @@ de.Result = function(result) {};
 de.Result.prototype.string = function() {};
 
 /**
-    @return {Object}
+    @return {number|boolean|string|Object}
 */
 de.Result.prototype.object = function() {};
 
@@ -91,7 +91,7 @@ de.Result.Raw.prototype.object = function() {
 /**
     @constructor
     @extends {de.Result}
-    @param {*} result
+    @param {number|boolean|string|Object} result
 */
 de.Result.Value = function(result) {
     this.result = result;

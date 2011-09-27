@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
-    @typedef {
+    @typedef {(
         {
             dirname: (string|undefined),
             guard: (function()|undefined),
@@ -14,7 +14,7 @@
             key: (string|undefined),
             maxage: (number|undefined)
         } | undefined
-    }
+    )}
 */
 de.Options;
 
@@ -33,13 +33,13 @@ de.Block = function(block, options) {};
     @param {de.Options=} options
 */
 de.Block.prototype.setOptions = function(options) {
-    this.options = options = options || {};
+    var _options = this.options = options || {};
 
     this.priority = 0;
 
-    this.dirname = options.dirname || de.config['rootdir'];
+    this.dirname = _options.dirname || de.config['rootdir'];
 
-    var guard = options.guard;
+    var guard = _options.guard;
     if (guard) {
         if (typeof guard === 'string') { // Нужно скомпилировать в функцию. Т.е. можно писать так:
                                          // guard: 'state.foo && !request.boo'
@@ -49,7 +49,7 @@ de.Block.prototype.setOptions = function(options) {
         }
     }
 
-    var select = options.select;
+    var select = _options.select;
     if (select) {
         for (var key in select) {
             select[key] = de.util.compileJPath(select[key]);
@@ -57,14 +57,14 @@ de.Block.prototype.setOptions = function(options) {
         this.select = select;
     }
 
-    this.before = options.before;
-    this.after = options.after;
+    this.before = _options.before;
+    this.after = _options.after;
 
-    this.timeout = options.timeout;
+    this.timeout = _options.timeout;
 
-    if (options.key && options.maxage !== undefined) {
-        this.key = options.key;
-        this.maxage = de.util.duration( options.maxage );
+    if (_options.key && _options.maxage !== undefined) {
+        this.key = _options.key;
+        this.maxage = de.util.duration( _options.maxage );
     }
 };
 
@@ -194,6 +194,7 @@ de.Block.prototype.subblocks = function() {
 };
 
 /**
+    @param {{ results: Array.<de.Result>, index: number }} result
     @return {de.Result}
 */
 de.Block.prototype.getResult = function(result) {
@@ -441,7 +442,7 @@ de.Block.Include.prototype._run = function(promise, context) {
 
                 var dirname = node.path.dirname(filename);
 
-                var options = de.util.extend( {}, that.options, { dirname: dirname } );
+                var options = /** @type {de.Options} */ ( de.util.extend( {}, that.options, { dirname: dirname } ) ); // NOTE: Внешние скобки нужны, чтобы gcc применил type cast.
                 var block = de.Block.Include._cache[ filename ] = new de.Block.Root(include, options);
 
                 block.run(context).then(function(result) {
@@ -461,6 +462,8 @@ de.Block.Include.prototype._run = function(promise, context) {
 };
 
 no.events.bind('file-changed', function(e, filename) {
+    /** @type {string} */ filename;
+
     delete de.Block.Include._cache[ filename ];
 });
 
@@ -510,7 +513,7 @@ de.Block.Http.prototype._run = function(promise, context) {
 
 /**
     @constructor
-    @param {*} value
+    @param {number|boolean|string|Object} value
     @param {de.Options=} options
     @extends {de.Block}
 */
@@ -532,7 +535,7 @@ de.Block.Value.prototype._run = function(promise, params) {
 
 /**
     @constructor
-    @param {*} root
+    @param {(number|boolean|string|Object|Array|function(de.Context))} root
     @param {de.Options=} options
     @extends {de.Block}
 */
@@ -599,12 +602,12 @@ de.Block.Root.prototype._run = function(promise, context) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
-    @param {*} block
+    @param {(number|boolean|string|Object|Array|function(de.Context))} block
     @param {de.Options=} options
 */
 de.Block.compile = function(block, options) {
 
-    options = options || {};
+    // options = options || {};
 
     var compiled;
     var priority;
@@ -666,7 +669,7 @@ de.Block.compile = function(block, options) {
                 compiled = new de.Block.Array(block, options);
 
             } else if (block && !(block instanceof de.Block)) {
-                compiled = new de.Block.Object(block, options);
+                compiled = new de.Block.Object(/** @type {!Object} */ block, options);
 
             } else {
                 compiled = block;
@@ -676,6 +679,8 @@ de.Block.compile = function(block, options) {
             break;
 
         case 'function':
+
+            /** @type {function(de.Context)} */ block;
 
             compiled = new de.Block.Function(block, options);
 

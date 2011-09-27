@@ -34,7 +34,7 @@ de.file.get = function(filename) {
             de.file._watched[filename] = true;
 
             // При изменении файла, удаляем его из кэша.
-            node.fs.watchFile(filename, function (curr, prev) {
+            node.fs.watchFile(filename, function (/** @type {{mtime: Date}} */ curr, /** @type {{mtime: Date}} */ prev) {
                 if (curr.mtime !== prev.mtime) {
                     no.events.trigger('file-changed', filename);
                 }
@@ -46,6 +46,8 @@ de.file.get = function(filename) {
 };
 
 no.events.bind('file-changed', function(e, filename) {
+    /** @type {string} */ filename;
+
     delete de.file._cache[ filename ];
 });
 

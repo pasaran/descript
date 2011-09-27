@@ -37,6 +37,9 @@ var nodeFs;
 /** @type {function()} */
 nodeFs.readFile;
 
+/** @type {function()} */
+nodeFs.watchFile;
+
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /** @typedef {Object} */
