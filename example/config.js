@@ -1,6 +1,6 @@
 de.config = {
 
-    'port': 2101,
+    'port': 2100,
 
     'blackbox': {
         'host': 'blackbox-mimino.yandex.net',
