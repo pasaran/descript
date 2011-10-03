@@ -92,9 +92,10 @@ de.Block.prototype.valueOf = function() {
 
 /**
     @param {de.Context} context
+    @param {!Object} params
     @return {no.Promise}
 */
-de.Block.prototype.run = function(context) {
+de.Block.prototype.run = function(context, params) {
     var promise;
     var isCached;
 
@@ -170,8 +171,10 @@ de.Block.prototype.run = function(context) {
             });
         }
 
+        // params = (this.params) ? this.params(context, params) : params; // FIXME: Пока вроде не нужно.
+
         if (!isCached) {
-            this._run(promise, context);
+            this._run(promise, context, params);
         }
     }
 
@@ -181,8 +184,9 @@ de.Block.prototype.run = function(context) {
 /**
     @param {no.Promise} promise
     @param {de.Context} context
+    @param {!Object} params
 */
-de.Block.prototype._run = function(promise, context) {};
+de.Block.prototype._run = function(promise, context, params) {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
@@ -328,8 +332,8 @@ de.Block.File = function(filename, options) {
 node.util.inherits( de.Block.File, de.Block );
 
 /** @override */
-de.Block.File.prototype._run = function(promise, context) {
-    var filename = de.util.resolveFilename( this.dirname, this.filename(context) );
+de.Block.File.prototype._run = function(promise, context, params) {
+    var filename = de.util.resolveFilename( this.dirname, this.filename(context, params) );
 
     de.file.get(filename)
         .then(function(result) {
@@ -346,7 +350,7 @@ de.Block.File.prototype._run = function(promise, context) {
 
 /**
     @constructor
-    @param {function(de.Context)} func
+    @param {function(de.Context, !Object)} func
     @param {de.Options=} options
     @extends {de.Block}
 */
@@ -358,11 +362,11 @@ de.Block.Function = function(func, options) {
 node.util.inherits( de.Block.Function, de.Block );
 
 /** @override */
-de.Block.Function.prototype._run = function(promise, context) {
-    var result = this.func(context);
+de.Block.Function.prototype._run = function(promise, context, params) {
+    var result = this.func(context, params);
 
     var block = new de.Block.Root(result); // FIXME: Правильные options.
-    block.run(context).then(function(result) {
+    block.run(context, params).then(function(result) {
         promise.resolve(result);
     });
 };
@@ -394,8 +398,8 @@ de.Block.Call = function(call, options) {
 node.util.inherits(de.Block.Call, de.Block);
 
 /** @override */
-de.Block.Call.prototype._run = function(promise, context) {
-    this.call(promise, context, this.method);
+de.Block.Call.prototype._run = function(promise, context, params) {
+    this.call(promise, context, params, this.method);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -422,12 +426,12 @@ node.util.inherits(de.Block.Include, de.Block);
 de.Block.Include._cache = {};
 
 /** @override */
-de.Block.Include.prototype._run = function(promise, context) {
-    var filename = de.util.resolveFilename( this.dirname, this.filename(context) );
+de.Block.Include.prototype._run = function(promise, context, params) {
+    var filename = de.util.resolveFilename( this.dirname, this.filename(context, params) );
 
     var block = de.Block.Include._cache[ filename ];
     if (block) {
-        block.run(context).then(function(result) {
+        block.run(context, params).then(function(result) {
             promise.resolve(result);
         });
         return;
@@ -445,7 +449,7 @@ de.Block.Include.prototype._run = function(promise, context) {
                 var options = /** @type {de.Options} */ ( de.util.extend( {}, that.options, { dirname: dirname } ) ); // NOTE: Внешние скобки нужны, чтобы gcc применил type cast.
                 var block = de.Block.Include._cache[ filename ] = new de.Block.Root(include, options);
 
-                block.run(context).then(function(result) {
+                block.run(context, params).then(function(result) {
                     promise.resolve(result);
                 });
             } catch (e) {
@@ -491,10 +495,10 @@ de.Block.Http = function(url, options) {
 node.util.inherits(de.Block.Http, de.Block);
 
 /** @override */
-de.Block.Http.prototype._run = function(promise, context) {
+de.Block.Http.prototype._run = function(promise, context, params) {
     var options = de.http.url2options(
-        this.url(context),
-        (this.extend) ? context['request'].query : null
+        this.url(context, params),
+        (this.extend) ? params : null
     );
 
     de.http.get(options)
@@ -525,7 +529,7 @@ de.Block.Value = function(value, options) {
 node.util.inherits(de.Block.Value, de.Block);
 
 /** @override */
-de.Block.Value.prototype._run = function(promise, params) {
+de.Block.Value.prototype._run = function(promise, context, params) {
     promise.resolve( new de.Result.Value(this.value) );
 };
 
@@ -559,7 +563,7 @@ de.Block.Root = function(root, options) {
 node.util.inherits( de.Block.Root, de.Block );
 
 /** @override */
-de.Block.Root.prototype._run = function(promise, context) {
+de.Block.Root.prototype._run = function(promise, context, params) {
     var that = this;
 
     var results = [];
@@ -576,7 +580,7 @@ de.Block.Root.prototype._run = function(promise, context) {
 
             do {
                 (function(block) {
-                    var promise = block.block.run(context).then(function(r) {
+                    var promise = block.block.run(context, params).then(function(r) {
                         results[ block.index ] = r;
                     });
                     promises.push(promise);

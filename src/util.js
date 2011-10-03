@@ -51,14 +51,14 @@ de.util.compileString = function(string) {
             if (r) {
                 body.push(r[1] + '["' + r[2] + '"]');
             } else {
-                body.push('request["' + part + '"]');
+                body.push('params["' + part + '"]');
             }
         } else {
             body.push('"' + part + '"');
         }
     }
 
-    return new Function('context', 'var state = context.state, request = context.request, config = context.config; return ' + body.join('+'));
+    return new Function('context', 'params', 'var state = context.state, config = context.config; return ' + body.join('+'));
 };
 
 de.util.compileJPath = function(string) {
