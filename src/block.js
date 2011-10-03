@@ -395,7 +395,7 @@ node.util.inherits(de.Block.Call, de.Block);
 
 /** @override */
 de.Block.Call.prototype._run = function(promise, context) {
-    this.call(promise, context);
+    this.call(promise, context, this.method);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
