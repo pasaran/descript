@@ -1,8 +1,44 @@
-/**
-    @suppress {duplicate}
-    @noalias
-*/
+// ------------------------------------------------------------------------------------------------------------- //
+// no
+// ------------------------------------------------------------------------------------------------------------- //
+
 var no = {};
+
+// ------------------------------------------------------------------------------------------------------------- //
+
+no.inherits = function(child, parent) {
+    var F = function() {};
+    F.prototype = parent.prototype;
+    child.prototype = new F();
+    child.prototype.constructor = child;
+};
+
+// ------------------------------------------------------------------------------------------------------------- //
+
+/**
+    @param {!Object} dest
+    @param {...!Object} srcs
+    @return {!Object}
+*/
+no.extend = function(dest) {
+    var srcs = [].slice.call(arguments, 1);
+
+    for (var i = 0, l = srcs.length; i < l; i++) {
+        var src = srcs[i];
+        for (var key in src) {
+            dest[key] = src[key];
+        }
+    }
+
+    return dest;
+};
+
+// ------------------------------------------------------------------------------------------------------------- //
+
+/**
+    Пустая функция. No operation.
+*/
+no.pe = function() {};
 
 // ------------------------------------------------------------------------------------------------------------- //
 // no.array
@@ -25,6 +61,38 @@ no.array.firstMatch = function(array, condition) {
     }
 
     return -1;
+};
+
+// ------------------------------------------------------------------------------------------------------------- //
+// no.object
+// ------------------------------------------------------------------------------------------------------------- //
+
+no.object = {};
+
+/**
+    @param {!Object} obj
+    @return {Array.<string>} Возвращает список всех ключей объекта.
+*/
+no.object.keys = function(obj) {
+    var keys = [];
+
+    for (var key in obj) {
+        keys.push(key);
+    }
+
+    return keys;
+};
+
+/**
+    @param {!Object} obj
+    @return {boolean} Определяет, пустой ли объект или нет.
+*/
+no.object.isEmpty = function(obj) {
+    for (var key in obj) {
+        return false;
+    }
+
+    return true;
 };
 
 // ------------------------------------------------------------------------------------------------------------- //
@@ -57,7 +125,7 @@ no.events._hid = 1;
 /**
     @const
 */
-no.events._hid_key =  no.events._hid_key ;
+no.events._hid_key = '_hid';
 
 // ------------------------------------------------------------------------------------------------------------- //
 
@@ -92,7 +160,7 @@ no.events.bind = function(name, handler) {
         handler[ no.events._hid_key ] = no.events._hid++;
     } else {
         var i = no.array.firstMatch(handlers, function(handler) { // Ищем этот обработчик среди уже подписанных.
-            return (hid === handler[ no.events._hid_key ]);
+            return ( handler[ no.events._hid_key ] === hid );
         });
         if (i !== -1) { return; } // Этот обработчик уже подписан.
     }
@@ -113,7 +181,7 @@ no.events.unbind = function(name, handler) {
 
         var handlers = no.events._get(name);
         var i = no.array.firstMatch(handlers, function(_handler) { // Ищем этот хэндлер среди уже забинженных обработчиков этого события.
-            return hid === _handler._hid;
+            return ( _handler._hid === hid );
         });
 
         if (i !== -1) {
@@ -129,7 +197,6 @@ no.events.unbind = function(name, handler) {
 /**
     "Генерим" событие name. Т.е. вызываем по-очереди (в порядке подписки) все обработчики события name.
     В каждый передаем name и params.
-    Если какой-то обработчик вернул false, то остальные обработчики не вызываются.
 
     @param {string} name
     @param {*=} params
@@ -138,7 +205,7 @@ no.events.trigger = function(name, params) {
     var handlers = no.events._get(name).slice(0); // Копируем список хэндлеров. Если вдруг внутри какого-то обработчика будет вызван unbind,
                                                   // то мы не потеряем вызов следующего обработчика.
     for (var i = 0, l = handlers.length; i < l; i++) {
-        if (handlers[i](name, params) === false) { return; } // Если обработчик вернул false, то прекращаем дальнейшую обработку.
+        handlers[i](name, params);
     }
 };
 
@@ -305,6 +372,25 @@ no.Promise.prototype.reject = function(error) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
+    Проксируем resolve/reject в другой promise.
+
+    @param {no.Promise}
+    @return {no.Promise}
+*/
+no.Promise.prototype.pipe = function(promise) {
+    this.then(function(result) {
+        promise.resolve(result);
+    });
+    this.else_(function(error) {
+        promise.reject(error);
+    });
+
+    return this;
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+/**
     Создать из массива promise'ов новый promise, который зарезолвится только после того,
     как зарезолвятся все promise'ы из списка. Результатом будет массив результатов.
 
@@ -337,6 +423,78 @@ no.Promise.wait = function(promises) {
     };
 
     return wait;
+};
+
+// ------------------------------------------------------------------------------------------------------------- //
+// no.Future
+// ------------------------------------------------------------------------------------------------------------- //
+
+no.Future = function(worker) {
+    this.worker = worker;
+};
+
+no.Future.prototype.run = function(params) {
+    var promise = new no.Promise();
+
+    this.worker(promise, params);
+
+    return promise;
+};
+
+// ------------------------------------------------------------------------------------------------------------- //
+
+no.Future.Wait = function(futures) {
+    this.futures = futures;
+};
+
+no.Future.Wait.prototype.run = function(params) {
+    var promises = [];
+
+    var futures = this.futures;
+    for (var i = 0, l = futures.length; i < l; i++) {
+        promises.push( futures[i].run(params) );
+    }
+
+    return no.Promise.wait( promises );
+};
+
+no.Future.wait = function(futures) {
+    return new no.Future.Wait(futures);
+};
+
+// ------------------------------------------------------------------------------------------------------------- //
+
+no.Future.Seq = function(futures) {
+    this.futures = futures;
+};
+
+no.Future.Seq.prototype.run = function(params) {
+    var promise = new no.Promise;
+
+    var futures = this.futures;
+    var l = futures.length;
+
+    var results = [];
+    (function run(i, params) {
+        if (i < l) {
+            futures[i].run(params)
+                .then(function(result) {
+                    results[i] = result;
+                    run(i + 1, result);
+                })
+                .else_(function(error) {
+                    promise.reject(error);
+                });
+        } else {
+            promise.resolve(results);
+        }
+    })(0, params);
+
+    return promise;
+};
+
+no.Future.seq = function(futures) {
+    return new no.Future.Seq(futures);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
