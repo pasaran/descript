@@ -1,35 +1,35 @@
 // ----------------------------------------------------------------------------------------------------------------- //
-// de.Response
+// ds.Response
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
     @constructor
     @param {nodeServerResponse} response
 */
-de.Response = function(response) {
+ds.Response = function(response) {
     this._response = response;
 
     this.headers = {};
     this.cookies = {};
 };
 
-de.Response.prototype.setHeader = function(name, value) {
+ds.Response.prototype.setHeader = function(name, value) {
     this.headers[name] = value;
 };
 
-de.Response.prototype.setCookie = function(name, value) {
+ds.Response.prototype.setCookie = function(name, value) {
     this.cookies[name] = value;
 };
 
-de.Response.prototype.setStatus = function(status) {
+ds.Response.prototype.setStatus = function(status) {
     this.status = status;
 };
 
-de.Response.prototype.setRedirect = function(location) {
+ds.Response.prototype.setRedirect = function(location) {
     this.location = location;
 };
 
-de.Response.prototype.end = function(result) {
+ds.Response.prototype.end = function(result) {
     var response = this._response;
 
     var headers = this.headers;

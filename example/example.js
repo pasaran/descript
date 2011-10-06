@@ -10,23 +10,23 @@ program
 
 var cwd = process.cwd();
 
-de.config['rootdir'] = node.path.resolve( cwd, program['rootdir'] );
+ds.config['rootdir'] = node.path.resolve( cwd, program['rootdir'] );
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 var server = node.http.createServer( function (/** @type {nodeServerRequest} */ req, /** @type {nodeServerResponse} */ res) {
     res.setHeader( 'Content-Type', 'text/javascript; charset: utf-8' );
 
-    var context = new de.Context(req, res, de.config);
+    var context = new ds.Context(req, res, ds.config);
 
     var path = context['request'].path;
     if (path === '/') {
         path = '/index.jsx';
     }
 
-    var block = new de.Block.Root(path);
+    var block = new ds.Block.Root(path);
     block.run(context).then(function(result) {
-        if (result instanceof de.Result.Error && result.get('id') === 'FILE_OPEN_ERROR') {
+        if (result instanceof ds.Result.Error && result.get('id') === 'FILE_OPEN_ERROR') {
             res.statusCode = 404;
             res.end( result.formatted() );
             return;
@@ -38,7 +38,7 @@ var server = node.http.createServer( function (/** @type {nodeServerRequest} */ 
     });
 });
 
-server.listen(de.config.port, '127.0.0.1');
+server.listen(ds.config.port, '127.0.0.1');
 
 // ----------------------------------------------------------------------------------------------------------------- //
 

@@ -497,3 +497,204 @@ no.Future.seq = function(futures) {
     return new no.Future.Seq(futures);
 };
 
+// ----------------------------------------------------------------------------------------------------------------- //
+
+var de = {};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+var node = {};
+
+/** @type {nodeFs} */
+node.fs = require('fs');
+
+/** @type {nodeHttp} */
+node.http = require('http');
+
+/** @type {nodePath} */
+node.path = require('path');
+
+/** @type {nodeUrl} */
+node.url = require('url');
+
+/** @type {nodeUtil} */
+node.util = require('util');
+
+/** @type {nodeVm} */
+node.vm = require('vm');
+
+/** @type {nodeQueryString} */
+node.querystring = require('querystring');
+
+// ----------------------------------------------------------------------------------------------------------------- //
+// de.file
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.file = {};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.file._cache = {};
+de.file._watched = {};
+
+// FIXME: Сейчас файл кэшируется навечно, что неправильно.
+//        Нужно или кэшировать на некоторое время (5 минут, например),
+//        или же следить за изменениями файла.
+
+de.file.get = function(filename) {
+    var promise = de.file._cache[filename];
+
+    if (!promise) {
+        promise = de.file._cache[filename] = new no.Promise();
+
+        node.fs.readFile(filename, function(error, content) {
+            if (error) {
+                promise.reject({
+                    'id': 'FILE_OPEN_ERROR',
+                    'message': error.message
+                });
+            } else {
+                promise.resolve(content);
+            }
+        });
+
+        if (!de.file._watched[filename]) { // FIXME: Непонятно, как это будет жить, когда файлов будет много.
+            de.file._watched[filename] = true;
+
+            // При изменении файла, удаляем его из кэша.
+            node.fs.watchFile(filename, function (/** @type {{mtime: Date}} */ curr, /** @type {{mtime: Date}} */ prev) {
+                if (curr.mtime !== prev.mtime) {
+                    no.events.trigger('file-changed', filename);
+                }
+            });
+        }
+    }
+
+    return promise;
+};
+
+no.events.bind('file-changed', function(e, filename) {
+    /** @type {string} */ filename;
+
+    delete de.file._cache[ filename ];
+});
+
+// ----------------------------------------------------------------------------------------------------------------- //
+// de.http
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.http = {};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+/**
+    @param {string} url
+    @param {Object=} params
+    @return {!Object}
+*/
+de.http.url2options = function(url, params) {
+    url = node.url.parse(url, true);
+
+    var query = url.query || {};
+    if (params) {
+        de.util.extend(query, params);
+    }
+
+    return {
+        'host': url.hostname,
+        'path': node.url.format({
+            'pathname': url.pathname,
+            'query': query
+        }),
+        'port': url.port || 80
+    };
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.http.errorMessages = {
+    '400': 'Bad Request',
+    '403': 'Forbidden',
+    '404': 'Not Found',
+    '500': 'Internal Server Error',
+    '503': 'Service Unavailable'
+};
+
+// ----------------------------------------------------------------------------------------------------------------- //
+
+de.http.get = function(url) {
+    var promise = new no.Promise();
+
+    de.http._get(url, promise, 0);
+
+    return promise;
+};
+
+de.http._get = function(options, promise, count) {
+    var data = [];
+
+    var req = node.http.request( options, function(res) {
+        var headers = res.headers;
+        var status = res.statusCode;
+
+        var error;
+        switch (status) {
+            case 301:
+            case 302:
+                if (count > 3) { // FIXME: MAX_REDIRECTS.
+                    return promise.reject({
+                        'id': 'HTTP_TOO_MANY_REDIRECTS'
+                    });
+                }
+
+                var location = headers['location'];
+                var redirect = de.http.url2options(location);
+                if (!redirect.host) {
+                    redirect.host = options.host;
+                }
+                return de.http._get(redirect, promise, count + 1);
+
+            case 400:
+            case 403:
+            case 404:
+            case 500:
+            case 503:
+                error = {
+                    'id': 'HTTP_' + status,
+                    'message': de.http.errorMessages[status]
+                };
+                break;
+
+            // TODO: default:
+        }
+
+        if (error) {
+            promise.reject(error);
+
+        } else {
+            res.on('data', function(chunk) {
+                data.push(chunk);
+            });
+            res.on('end', function() {
+                promise.resolve(data);
+            });
+            res.on('close', function(error) {
+                promise.reject({
+                    'id': 'HTTP_CONNECTION_CLOSED',
+                    'message': error.message
+                });
+            });
+
+        }
+    } );
+
+    req.on('error', function(error) {
+        promise.reject({
+            'id': 'HTTP_UNKNOWN_ERROR',
+            'message': error.message
+        });
+    });
+
+    req.end();
+};
+

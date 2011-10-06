@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------------------------------------- //
-// de.Context
+// ds.Context
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
@@ -8,9 +8,9 @@
     @param {nodeServerResponse} response
     @param {Object=} config
 */
-de.Context = function(request, response, config) {
-    this['request'] = new de.Request(request);
-    this['response'] = new de.Response(response);
+ds.Context = function(request, response, config) {
+    this['request'] = new ds.Request(request);
+    this['response'] = new ds.Response(response);
     this['config'] = config || {};
     this['state'] = {};
     this.now = +new Date();

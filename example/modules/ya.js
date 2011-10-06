@@ -1,16 +1,16 @@
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.modules['ya'] = {};
+ds.modules['ya'] = {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
 /**
     @param {no.Promise} promise
-    @param {de.Context} context
+    @param {ds.Context} context
     @param {!Object} params
 */
-de.modules['ya']['auth'] = function(promise, context, params) {
-    var blackboxConfig = de.config['blackbox'];
+ds.modules['ya']['auth'] = function(promise, context, params) {
+    var blackboxConfig = ds.config['blackbox'];
     var request = context['request'];
 
     var host = blackboxConfig['host'];
@@ -30,10 +30,10 @@ de.modules['ya']['auth'] = function(promise, context, params) {
         }
     )
     .then(function(result) {
-        promise.resolve( new de.Result.Raw(result, true) );
+        promise.resolve( new ds.Result.Raw(result, true) );
     })
     .else_(function(error) {
-        promise.resolve( new de.Result.Error(error) );
+        promise.resolve( new ds.Result.Error(error) );
     });
 };
 

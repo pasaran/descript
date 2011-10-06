@@ -1,8 +1,8 @@
 // ----------------------------------------------------------------------------------------------------------------- //
-// de.util
+// ds.util
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.util = {};
+ds.util = {};
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
@@ -11,7 +11,7 @@ de.util = {};
     @param {...!Object} srcs
     @return {!Object}
 */
-de.util.extend = function(dest, srcs) {
+ds.util.extend = function(dest, srcs) {
     for (var i = 1, l = arguments.length; i < l; i++) {
         var src = arguments[i];
         for (var key in src) {
@@ -24,8 +24,8 @@ de.util.extend = function(dest, srcs) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.util.resolveFilename = function(dirname, filename) {
-    var root = de.config['rootdir'];
+ds.util.resolveFilename = function(dirname, filename) {
+    var root = ds.config['rootdir'];
 
     if (/^\//.test(filename)) { // Absolute path.
         filename = node.path.join(root, filename);
@@ -39,7 +39,7 @@ de.util.resolveFilename = function(dirname, filename) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.util.compileString = function(string) {
+ds.util.compileString = function(string) {
     var parts = string.split(/{(.*?)}/g);
 
     var body = [];
@@ -61,7 +61,7 @@ de.util.compileString = function(string) {
     return new Function('context', 'params', 'var state = context.state, config = context.config; return ' + body.join('+'));
 };
 
-de.util.compileJPath = function(string) {
+ds.util.compileJPath = function(string) {
     var parts = string.split(/\./g);
 
     var body = '';
@@ -78,7 +78,7 @@ de.util.compileJPath = function(string) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.util.parseCookies = function(cookie) {
+ds.util.parseCookies = function(cookie) {
     var cookies = {};
 
     var parts = cookie.split(';');
@@ -94,7 +94,7 @@ de.util.parseCookies = function(cookie) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-de.util.duration = function(s) {
+ds.util.duration = function(s) {
     if (typeof s === 'number') {
         return s;
     }

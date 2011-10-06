@@ -1,4 +1,4 @@
-de.config = {
+ds.config = {
 
     'port': 2100,
 
