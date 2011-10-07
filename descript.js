@@ -745,7 +745,7 @@ ds.util.resolveFilename = function(dirname, filename) {
 // ----------------------------------------------------------------------------------------------------------------- //
 
 ds.util.compileString = function(string) {
-    var parts = string.split(/{(.*?)}/g);
+    var parts = string.split(/{\s*([^\s}]*)\s*}/g);
 
     var body = [];
     for (var i = 0, l = parts.length; i < l; i++) {
@@ -754,9 +754,9 @@ ds.util.compileString = function(string) {
         if (i % 2) {
             var r = part.match(/^(state|config)\.(.*)$/);
             if (r) {
-                body.push(r[1] + '["' + r[2] + '"]');
+                body.push('(' + r[1] + '["' + r[2] + '"] || "")'); // TODO: Нужно уметь еще и { config.blackbox.url }.
             } else {
-                body.push('params["' + part + '"]');
+                body.push('( params["' + part + '"] || "")');
             }
         } else {
             body.push('"' + part + '"');
@@ -772,9 +772,9 @@ ds.util.compileJPath = function(string) {
     var body = '';
     for (var i = 0, l = parts.length; i < l; i++) {
         var r = parts[i].match(/^(.+?)(\[\d+\])?$/);
-        body += 'if (!r) return null;r = r["' + r[1] + '"];';
+        body += 'if (!r) return; r = r["' + r[1] + '"];';
         if (r[2]) {
-            body += 'if (!r) return null;r = r' + r[2] + ';';
+            body += 'if (!r) return; r = r' + r[2] + ';';
         }
     }
 
