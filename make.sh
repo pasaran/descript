@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat deps/delib.js \
+cat noscript/delib-core.js \
     src/descript.js \
     src/util.js \
     src/block.js \
@@ -9,5 +9,4 @@ cat deps/delib.js \
     src/response.js \
     src/request.js \
     > descript.js
-
 
