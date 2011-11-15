@@ -1,5 +1,4 @@
 # Внешние зависимости.
 
-delib.js                https://raw.github.com/pasaran/noscript/0.0.12/delib-core.js                0.0.12
-commander.js            https://raw.github.com/visionmedia/commander.js/0.1.0/lib/commander.js      0.1.0
+commander.js            https://raw.github.com/visionmedia/commander.js/0.3.3/lib/commander.js      0.3.3
 

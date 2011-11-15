@@ -1,3 +1,4 @@
+
 /*!
  * commander
  * Copyright(c) 2011 TJ Holowaychuk <tj@vision-media.ca>
@@ -44,8 +45,8 @@ function Option(flags, description) {
   this.required = ~flags.indexOf('<');
   this.optional = ~flags.indexOf('[');
   this.bool = !~flags.indexOf('-no-');
-  flags = flags.split(/[ ,|]+/)
-  this.short = flags.shift();
+  flags = flags.split(/[ ,|]+/);
+  if (flags.length > 1 && !/^[[<]/.test(flags[1])) this.short = flags.shift();
   this.long = flags.shift();
   this.description = description;
 }
@@ -261,30 +262,43 @@ Command.prototype.action = function(fn){
 Command.prototype.option = function(flags, description, fn, defaultValue){
   var self = this
     , option = new Option(flags, description)
-    , name = camelcase(option.name());
+    , oname = option.name()
+    , name = camelcase(oname);
 
   // default as 3rd arg
   if ('function' != typeof fn) defaultValue = fn, fn = null;
 
-  // when --no-* we default to true
-  if (false == option.bool) defaultValue = true;
-
-  // default
-  if (undefined !== defaultValue) self[name] = defaultValue;
+  // preassign default value only for --no-*, [optional], or <required>
+  if (false == option.bool || option.optional || option.required) {
+    // when --no-* we make sure default is true
+    if (false == option.bool) defaultValue = true;
+    // preassign only if we have a default
+    if (undefined !== defaultValue) self[name] = defaultValue;
+  }
 
   // register the option
   this.options.push(option);
 
   // when it's passed assign the value
   // and conditionally invoke the callback
-  this.on(name, function(val){
+  this.on(oname, function(val){
     // coercion
     if (null != val && fn) val = fn(val);
 
-    // assign value
-    self[name] = null == val
-      ? option.bool
-      : val;
+    // unassigned or bool
+    if ('boolean' == typeof self[name] || 'undefined' == typeof self[name]) {
+      // if no value, bool true, and we have a default, then use it!
+      if (null == val) {
+        self[name] = option.bool
+          ? defaultValue || true
+          : false;
+      } else {
+        self[name] = val;
+      }
+    } else if (null !== val) {
+      // reassign
+      self[name] = val;
+    }
   });
 
   return this;
@@ -489,18 +503,20 @@ Command.prototype.unknownOption = function(flag){
 /**
  * Set the program version to `str`.
  *
- * This method auto-registers the "-v, --version" flag
+ * This method auto-registers the "-V, --version" flag
  * which will print the version number when passed.
  *
  * @param {String} str
+ * @param {String} flags
  * @return {Command} for chaining
  * @api public
  */
 
-Command.prototype.version = function(str){
+Command.prototype.version = function(str, flags){
   if (0 == arguments.length) return this._version;
   this._version = str;
-  this.option('-v, --version', 'output the version number');
+  flags = flags || '-V, --version';
+  this.option(flags, 'output the version number');
   this.on('version', function(){
     console.log(str);
     process.exit(0);
@@ -889,5 +905,8 @@ exports.option('-h, --help', 'output usage information');
 exports.on('help', function(){
   process.stdout.write(this.helpInformation());
   exports.emit('--help');
-  process.exit(0);
+  process.stdout.destroySoon();
+  process.stdout.on('close', function(){
+    process.exit(0);
+  });
 });
