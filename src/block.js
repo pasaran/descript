@@ -465,7 +465,7 @@ ds.Block.Include.prototype._run = function(promise, context, params) {
         });
 };
 
-no.events.bind('file-changed', function(e, filename) {
+no.events.on('file-changed', function(e, filename) {
     /** @type {string} */ filename;
 
     delete ds.Block.Include._cache[ filename ];
