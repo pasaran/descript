@@ -669,7 +669,9 @@ ds.Block.compile = function(block, options) {
 
         case 'object':
 
-            if (block instanceof Array) {
+            //  NOTE: Тут нельзя использовать (block instanceof Array) потому, что .jsx файлы эвалятся
+            //  в другом контексте и там другой Array. Для справки -- util.isArray примерно в 10 раз медленнее, чем instanceof.
+            if (Array.isArray(block)) {
                 compiled = new ds.Block.Array(block, options);
 
             } else if (block && !(block instanceof ds.Block)) {
