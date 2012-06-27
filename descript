@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+var Descript = require('./lib/descript.js');
+
+var descript = new Descript({}, {});
+
+descript.start();
+
+// vim: set filetype=javascript:
+
