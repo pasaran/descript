@@ -1,43 +1,20 @@
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Options
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-/**
-    @typedef {(
-        {
-            dirname: (string|undefined),
-            guard: (function()|undefined),
-            select: (!Object|undefined),
-            before: (function()|undefined),
-            after: (function()|undefined),
-            timeout: (number|undefined),
-            key: (string|undefined),
-            maxage: (number|undefined)
-        } | undefined
-    )}
-*/
-ds.Options;
+var Block = function(block, config, sandbox, options) {};
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-/**
-    @constructor
-    @param {*} block
-    @param {ds.Options=} options
-*/
-ds.Block = function(block, options) {};
+Block.prototype._init = function(config, sandbox, options) {
+    this.config = config;
+    this.sandbox = sandbox;
 
-/**
-    @param {ds.Options=} options
-*/
-ds.Block.prototype.setOptions = function(options) {
     var _options = this.options = options || {};
 
     this.priority = 0;
 
-    this.dirname = _options.dirname || ds.config['rootdir'];
+    this.dirname = _options.dirname || config.rootdir;
 
     var guard = _options.guard;
     if (guard) {
@@ -68,38 +45,29 @@ ds.Block.prototype.setOptions = function(options) {
     }
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-ds.Block._id = 0;
+var _id = 0;
+var _blocks = {};
 
-/** @type {!Object.<string, ds.Block>} */
-ds.Block._blocks = {};
-
-/**
-    @return {string}
-*/
-ds.Block.prototype.valueOf = function() {
+Block.prototype.valueOf = function() {
     var id = this._id;
     if (!id) {
-        id = this._id = '@block' + ds.Block._id++ + '@';
-        ds.Block._blocks[id] = this;
+        id = this._id = '@block' + _id++ + '@';
+        _blocks[id] = this;
     }
 
     return id;
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-/**
-    @param {ds.Context} context
-    @param {!Object} params
-    @return {no.Promise}
-*/
-ds.Block.prototype.run = function(context, params) {
+Block.prototype.run = function(context, params) {
     var promise;
     var isCached;
 
-    var before = this.before; // FIXME: На закэшированные блоки before не окажет никакого влияния.
+    //  FIXME: На закэшированные блоки before не окажет никакого влияния.
+    var before = this.before;
     if (before) {
         before(context);
     }
@@ -107,12 +75,12 @@ ds.Block.prototype.run = function(context, params) {
     var guard = this.guard;
     if (guard && !guard(context)) {
         promise = new no.Promise();
-        promise.resolve( new ds.Result.Value(null) ); // FIXME: Или же возвращать ошибку.
+        promise.resolve( new Result.Value(null) );
 
     } else {
         var key = this.key;
         if (key) {
-            var cached = ds.Result._cache[key];
+            var cached = Result._cache[key];
             if ( cached && (cached.timestamp + this.maxage > context.now) ) {
                 promise = cached.promise;
                 isCached = true;
@@ -123,14 +91,14 @@ ds.Block.prototype.run = function(context, params) {
             promise = new no.Promise();
 
             if (key) {
-                ds.Result._cache[key] = {
+                Result._cache[key] = {
                     timestamp: context.now,
                     promise: promise
                 };
 
                 promise.then(function(result) {
-                    if (result instanceof ds.Result.Error) {
-                        delete ds.Result._cache[key];
+                    if (result instanceof Result.Error) {
+                        delete Result._cache[key];
                     }
                 });
             }
@@ -145,7 +113,7 @@ ds.Block.prototype.run = function(context, params) {
             });
 
             timeout = setTimeout(function() {
-                promise.resolve( new ds.Result.Error({
+                promise.resolve( new Result.Error({
                     id: 'TIMEOUT',
                     message: 'Timeout' // FIXME: Вменяемый текст.
                 }) );
@@ -181,63 +149,42 @@ ds.Block.prototype.run = function(context, params) {
     return promise;
 };
 
-/**
-    @param {no.Promise} promise
-    @param {ds.Context} context
-    @param {!Object} params
-*/
-ds.Block.prototype._run = function(promise, context, params) {};
+Block.prototype._run = function(promise, context, params) {};
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-/**
-    @return {Array.<ds.Block>}
-*/
-ds.Block.prototype.subblocks = function() {
+Block.prototype.subblocks = function() {
     return [ this ];
 };
 
-/**
-    @param {{ results: Array.<ds.Result>, index: number }} result
-    @return {ds.Result}
-*/
-ds.Block.prototype.getResult = function(result) {
+Block.prototype.getResult = function(result) {
     return result.results[ result.index++ ];
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-/**
-    @param {number} priority
-*/
-ds.Block.prototype.setPriority = function(priority) {
+Block.prototype.setPriority = function(priority) {
     this.priority = priority;
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.Array
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {Array} array
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.Array = function(array, options) {
-    this.setOptions(options);
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.Array
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Array = function(array, config, sandbox, options) {
+    this._init(config, sandbox, options);
 
     var blocks = this.blocks = [];
 
     for (var i = 0, l = array.length; i < l; i++) {
-        blocks.push( ds.Block.compile( array[i], options ) );
+        blocks.push( Block.compile( array[i], options ) );
     }
 };
 
-node.util.inherits( ds.Block.Array, ds.Block );
+node.util.inherits( Block.Array, Block );
 
-/** @override */
-ds.Block.Array.prototype.subblocks = function() {
+Block.Array.prototype.subblocks = function() {
     var subblocks = [];
 
     var blocks = this.blocks;
@@ -248,8 +195,7 @@ ds.Block.Array.prototype.subblocks = function() {
     return subblocks;
 };
 
-/** @override */
-ds.Block.Array.prototype.getResult = function(result) {
+Block.Array.prototype.getResult = function(result) {
     var blocks = this.blocks;
     var r = [];
 
@@ -257,11 +203,10 @@ ds.Block.Array.prototype.getResult = function(result) {
         r.push( blocks[i].getResult(result) );
     }
 
-    return new ds.Result.Array(r);
+    return new Result.Array(r);
 };
 
-/** @override */
-ds.Block.Array.prototype.setPriority = function(priority) {
+Block.Array.prototype.setPriority = function(priority) {
     var blocks = this.blocks;
 
     for (var i = 0, l = blocks.length; i < l; i++) {
@@ -269,38 +214,30 @@ ds.Block.Array.prototype.setPriority = function(priority) {
     }
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.Object
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {Object} object
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.Object = function(object, options) {
-    this.setOptions(options);
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.Object
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Object = function(object, config, sandbox, options) {
+    this._init(config, sandbox, options);
 
     var blocks = this.blocks = [];
     var keys = this.keys = [];
 
     for (var key in object) {
-        blocks.push( ds.Block.compile( object[key], options ) );
+        blocks.push( Block.compile( object[key], options ) );
         keys.push(key);
     }
 };
 
-node.util.inherits( ds.Block.Object, ds.Block );
+node.util.inherits( Block.Object, Block );
 
-/** @override */
-ds.Block.Object.prototype.subblocks = ds.Block.Array.prototype.subblocks;
+Block.Object.prototype.subblocks = Block.Array.prototype.subblocks;
 
-/** @override */
-ds.Block.Object.prototype.setPriority = ds.Block.Array.prototype.setPriority;
+Block.Object.prototype.setPriority = Block.Array.prototype.setPriority;
 
-/** @override */
-ds.Block.Object.prototype.getResult = function(result) {
+Block.Object.prototype.getResult = function(result) {
     var blocks = this.blocks;
     var keys = this.keys;
 
@@ -310,79 +247,65 @@ ds.Block.Object.prototype.getResult = function(result) {
         r[ keys[i] ] = blocks[i].getResult(result);
     }
 
-    return new ds.Result.Object(r);
+    return new Result.Object(r);
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.File
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {string} filename
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.File = function(filename, options) {
-    this.setOptions(options);
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.File
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.File = function(filename, config, sandbox, options) {
+    this._init(config, sandbox, options);
 
     this.filename = ds.util.compileString(filename);
 };
 
-node.util.inherits( ds.Block.File, ds.Block );
+node.util.inherits( Block.File, Block );
 
-/** @override */
-ds.Block.File.prototype._run = function(promise, context, params) {
+Block.File.prototype._run = function(promise, context, params) {
     var filename = ds.util.resolveFilename( this.dirname, this.filename(context, params) );
 
     de.file.get(filename)
         .then(function(result) {
-            promise.resolve( new ds.Result.Raw([ result ], true) ); // FIXME: Учесть options.dataType.
+            //  FIXME: Учесть options.dataType.
+            promise.resolve( new Result.Raw([ result ], true) );
         })
         .else_(function(error) {
-            promise.resolve( new ds.Result.Error(error) );
+            promise.resolve( new Result.Error(error) );
         });
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.Function
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {function(ds.Context, !Object)} func
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.Function = function(func, options) {
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.Function
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Function = function(func, config, sandbox, options) {
+    this._init(config, sandbox, options);
+
     this.func = func;
-    this.setOptions(options);
 };
 
-node.util.inherits( ds.Block.Function, ds.Block );
+node.util.inherits( Block.Function, Block );
 
-/** @override */
-ds.Block.Function.prototype._run = function(promise, context, params) {
+Block.Function.prototype._run = function(promise, context, params) {
     var result = this.func(context, params);
 
-    var block = new ds.Block.Root(result); // FIXME: Правильные options.
+    //  FIXME: Правильные options.
+    var block = new Block.Root(result);
     block.run(context, params).then(function(result) {
         promise.resolve(result);
     });
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.Call
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {string} call
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.Call = function(call, options) {
-    this.setOptions(options);
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.Call
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Call = function(call, config, sandbox, options) {
+    this._init(config, sandbox, options);
 
     var r = call.match(/^(?:(.*?):)?(.*)\(\)$/);
 
@@ -395,41 +318,33 @@ ds.Block.Call = function(call, options) {
     this.call = (typeof call === 'function') ? call : module;
 };
 
-node.util.inherits(ds.Block.Call, ds.Block);
+node.util.inherits(Block.Call, Block);
 
-/** @override */
-ds.Block.Call.prototype._run = function(promise, context, params) {
+Block.Call.prototype._run = function(promise, context, params) {
     this.call(promise, context, params, this.method);
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.Include
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {string} filename
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.Include = function(filename, options) {
-    this.setOptions(options);
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.Include
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Include = function(filename, config, sandbox, options) {
+    this._init(config, sandbox, options);
 
     this.filename = ds.util.compileString(filename);
 };
 
-node.util.inherits(ds.Block.Include, ds.Block);
+node.util.inherits(Block.Include, Block);
 
-/**
-    @type {!Object.<string, ds.Block.Root>}
-*/
-ds.Block.Include._cache = {};
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-/** @override */
-ds.Block.Include.prototype._run = function(promise, context, params) {
+var Block.Include._cache = {};
+
+Block.Include.prototype._run = function(promise, context, params) {
     var filename = ds.util.resolveFilename( this.dirname, this.filename(context, params) );
 
-    var block = ds.Block.Include._cache[ filename ];
+    var block = Block.Include._cache[ filename ];
     if (block) {
         block.run(context, params).then(function(result) {
             promise.resolve(result);
@@ -446,14 +361,14 @@ ds.Block.Include.prototype._run = function(promise, context, params) {
 
                 var dirname = node.path.dirname(filename);
 
-                var options = /** @type {ds.Options} */ ( ds.util.extend( {}, that.options, { dirname: dirname } ) ); // NOTE: Внешние скобки нужны, чтобы gcc применил type cast.
-                var block = ds.Block.Include._cache[ filename ] = new ds.Block.Root(include, options);
+                var options = ds.util.extend( {}, that.options, { dirname: dirname } );
+                var block = Block.Include._cache[ filename ] = new Block.Root(include, options);
 
                 block.run(context, params).then(function(result) {
                     promise.resolve(result);
                 });
             } catch (e) {
-                promise.resolve( new ds.Result.Error({
+                promise.resolve( new Result.Error({
                     id: 'FILE_EVAL_ERROR',
                     message: e.message,
                     e: e
@@ -461,28 +376,21 @@ ds.Block.Include.prototype._run = function(promise, context, params) {
             }
         })
         .else_(function(error) {
-            promise.resolve( new ds.Result.Error(error) );
+            promise.resolve( new Result.Error(error) );
         });
 };
 
 no.events.on('file-changed', function(e, filename) {
-    /** @type {string} */ filename;
-
-    delete ds.Block.Include._cache[ filename ];
+    delete Block.Include._cache[ filename ];
 });
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.Http
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {string} url
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.Http = function(url, options) {
-    this.setOptions(options);
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.Http
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Http = function(url, config, sandbox, options) {
+    this._init(config, sandbox, options);
 
     if (/(\?|&)$/.test(url)) {
         this.extend = true;
@@ -492,10 +400,11 @@ ds.Block.Http = function(url, options) {
     this.url = ds.util.compileString(url);
 };
 
-node.util.inherits(ds.Block.Http, ds.Block);
+node.util.inherits(Block.Http, Block);
 
-/** @override */
-ds.Block.Http.prototype._run = function(promise, context, params) {
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Http.prototype._run = function(promise, context, params) {
     var options = de.http.url2options(
         this.url(context, params),
         (this.extend) ? params : null
@@ -503,50 +412,42 @@ ds.Block.Http.prototype._run = function(promise, context, params) {
 
     de.http.get(options)
         .then(function(result) {
-            promise.resolve( new ds.Result.Raw(result, true) ); // FIXME: Учесть options.dataType.
+            promise.resolve( new Result.Raw(result, true) ); // FIXME: Учесть options.dataType.
         })
         .else_(function(error) {
-            promise.resolve( new ds.Result.Error(error) );
+            promise.resolve( new Result.Error(error) );
         });
 
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.Value
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {number|boolean|string|Object} value
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.Value = function(value, options) {
-    this.setOptions(options);
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.Value
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Value = function(value, config, sandbox, options) {
+    this._init(config, sandbox, options);
+
     this.value = value;
 };
 
-node.util.inherits(ds.Block.Value, ds.Block);
+node.util.inherits(Block.Value, Block);
 
-/** @override */
-ds.Block.Value.prototype._run = function(promise, context, params) {
-    promise.resolve( new ds.Result.Value(this.value) );
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Value.prototype._run = function(promise, context, params) {
+    promise.resolve( new Result.Value(this.value) );
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Block.Root
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @constructor
-    @param {(number|boolean|string|Object|Array|function(ds.Context))} root
-    @param {ds.Options=} options
-    @extends {ds.Block}
-*/
-ds.Block.Root = function(root, options) {
-    this.setOptions(options);
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Block.Root
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-    this.root = ds.Block.compile(root, options);
+Block.Root = function(root, config, sandbox, options) {
+    this._init(config, sandbox, options);
+
+    this.root = Block.compile(root, options);
 
     var subblocks = this.subblocks = this.root.subblocks();
 
@@ -560,10 +461,11 @@ ds.Block.Root = function(root, options) {
     this.subblocks = sorted.sort(function(a, b) { return b.block.priority - a.block.priority; });
 };
 
-node.util.inherits( ds.Block.Root, ds.Block );
+node.util.inherits( Block.Root, Block );
 
-/** @override */
-ds.Block.Root.prototype._run = function(promise, context, params) {
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.Root.prototype._run = function(promise, context, params) {
     var that = this;
 
     var results = [];
@@ -603,13 +505,10 @@ ds.Block.Root.prototype._run = function(promise, context, params) {
     })();
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
 
-/**
-    @param {(number|boolean|string|Object|Array|function(ds.Context))} block
-    @param {ds.Options=} options
-*/
-ds.Block.compile = function(block, options) {
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.compile = function(block, config, sandbox, options) {
 
     // options = options || {};
 
@@ -624,18 +523,18 @@ ds.Block.compile = function(block, options) {
 
             if (( r = /^http:\/\//.test(block) )) { // Строка начинается с 'http://' -- это http-блок.
                                                     // FIXME: Поддержка https, post, get и т.д.
-                compiled = new ds.Block.Http(block, options);
+                compiled = new Block.Http(block, options);
 
             } else if (( r = block.match(/^(.*\(\))(\d+)?$/) )) { // Строка оканчивается на '()' -- это call-блок.
-                compiled = new ds.Block.Call(r[1], options);
+                compiled = new Block.Call(r[1], options);
                 priority = r[2];
 
             } else if (( r = block.match(/^(.*\.jsx)(\d+)?$/) )) { // Строка оканчивается на '.jsx' -- это include-блок.
-                compiled = new ds.Block.Include(r[1], options);
+                compiled = new Block.Include(r[1], options);
                 priority = r[2];
 
             } else if (( r = block.match(/^(.*\.(?:json|txt|xml))(\d+)?$/) )) { // Строка оканчивается на '.json' -- это file-блок.
-                compiled = new ds.Block.File(r[1], options);
+                compiled = new Block.File(r[1], options);
                 priority = r[2];
 
             //  В предыдущих трех случаях в конце строки может быть число, означающее приоритет.
@@ -651,17 +550,17 @@ ds.Block.compile = function(block, options) {
             //          ...
             //      }
             //
-            //  Работает это за счет того, что у ds.Block переопределен метод valueOf,
+            //  Работает это за счет того, что у Block переопределен метод valueOf,
             //  который возвращает уникальную строку вида '@block25@'.
 
             } else if (( r = block.match(/^(@block\d+@)(\d+)$/) ) || ( r = block.match(/^(\d+)(@block\d+@)$/) )) { // Строка вида '@block25@45' или '45@block25@',
                                                                                                                    // где 25 это порядковый номер блока, а 45 -- приоритет.
                 var id = r[1];
 
-                compiled = ds.Block._blocks[id];
+                compiled = _blocks[id];
                 priority = r[2];
 
-                delete ds.Block._blocks[id];
+                delete _blocks[id];
 
             }
 
@@ -672,10 +571,10 @@ ds.Block.compile = function(block, options) {
             //  NOTE: Тут нельзя использовать (block instanceof Array) потому, что .jsx файлы эвалятся
             //  в другом контексте и там другой Array. Для справки -- util.isArray примерно в 10 раз медленнее, чем instanceof.
             if (Array.isArray(block)) {
-                compiled = new ds.Block.Array(block, options);
+                compiled = new Block.Array(block, options);
 
-            } else if (block && !(block instanceof ds.Block)) {
-                compiled = new ds.Block.Object(/** @type {!Object} */ block, options);
+            } else if (block && !(block instanceof Block)) {
+                compiled = new Block.Object(/** @type {!Object} */ block, options);
 
             } else {
                 compiled = block;
@@ -688,14 +587,14 @@ ds.Block.compile = function(block, options) {
 
             /** @type {function(ds.Context)} */ block;
 
-            compiled = new ds.Block.Function(block, options);
+            compiled = new Block.Function(block, options);
 
             break;
 
     }
 
     if (!compiled) {
-        compiled = new ds.Block.Value(block, options);
+        compiled = new Block.Value(block, options);
     }
 
     if (priority) {
@@ -705,44 +604,4 @@ ds.Block.compile = function(block, options) {
     return compiled;
 
 };
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-ds.sandbox = {};
-
-// ----------------------------------------------------------------------------------------------------------------- //
-
-ds.sandbox['http'] = function(url, options) {
-    return new ds.Block.Http(url, options);
-};
-
-ds.sandbox['file'] = function(filename, options) {
-    return new ds.Block.File(filename, options);
-};
-
-ds.sandbox['include'] = function(filename, options) {
-    return new ds.Block.Include(filename, options);
-};
-
-ds.sandbox['call'] = function(call, options) {
-    return new ds.Block.Call(call, options);
-};
-
-ds.sandbox['array'] = function(array, options) {
-    return new ds.Block.Array(array, options);
-};
-
-ds.sandbox['object'] = function(object, options) {
-    return new ds.Block.Object(object, options);
-};
-
-ds.sandbox['value'] = function(value, options) {
-    return new ds.Block.Value(value, options);
-};
-
-ds.sandbox['func'] = function(func, options) {
-    return new ds.Block.Function(func, options);
-};
-
-// ----------------------------------------------------------------------------------------------------------------- //
 

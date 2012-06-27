@@ -1,17 +1,12 @@
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.util
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  common
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-ds.util = {};
+var common = {};
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-/**
-    @param {!Object} dest
-    @param {...!Object} srcs
-    @return {!Object}
-*/
-ds.util.extend = function(dest, srcs) {
+common.extend = function(dest, srcs) {
     for (var i = 1, l = arguments.length; i < l; i++) {
         var src = arguments[i];
         for (var key in src) {
@@ -22,16 +17,17 @@ ds.util.extend = function(dest, srcs) {
     return dest;
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-ds.util.resolveFilename = function(dirname, filename) {
+common.resolveFilename = function(dirname, filename) {
     var root = ds.config['rootdir'];
 
-    if (/^\//.test(filename)) { // Absolute path.
+    if (/^\//.test(filename)) {
+        //  Absolute path.
         filename = node.path.join(root, filename);
     } else {
         filename = node.path.resolve(dirname, filename);
-        // FIXME: Проверить, что путь не вышел за пределы root'а.
+        //  FIXME: Проверить, что путь не вышел за пределы root'а.
     }
 
     return filename;
@@ -39,7 +35,7 @@ ds.util.resolveFilename = function(dirname, filename) {
 
 // ----------------------------------------------------------------------------------------------------------------- //
 
-ds.util.compileString = function(string) {
+common.compileString = function(string) {
     var parts = string.split(/{\s*([^\s}]*)\s*}/g);
 
     var body = [];
@@ -49,7 +45,8 @@ ds.util.compileString = function(string) {
         if (i % 2) {
             var r = part.match(/^(state|config)\.(.*)$/);
             if (r) {
-                body.push('(' + r[1] + '["' + r[2] + '"] || "")'); // TODO: Нужно уметь еще и { config.blackbox.url }.
+                //  TODO: Нужно уметь еще и { config.blackbox.url }.
+                body.push('(' + r[1] + '["' + r[2] + '"] || "")');
             } else {
                 body.push('( params["' + part + '"] || "")');
             }
@@ -61,7 +58,7 @@ ds.util.compileString = function(string) {
     return new Function('context', 'params', 'var state = context.state, config = context.config; return ' + body.join('+'));
 };
 
-ds.util.compileJPath = function(string) {
+common.compileJPath = function(string) {
     var parts = string.split(/\./g);
 
     var body = '';
@@ -76,9 +73,9 @@ ds.util.compileJPath = function(string) {
     return new Function('r', body + 'return r;');
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-ds.util.parseCookies = function(cookie) {
+common.parseCookies = function(cookie) {
     var cookies = {};
 
     var parts = cookie.split(';');
@@ -92,9 +89,9 @@ ds.util.parseCookies = function(cookie) {
     return cookies;
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-ds.util.duration = function(s) {
+common.duration = function(s) {
     if (typeof s === 'number') {
         return s;
     }
@@ -124,5 +121,9 @@ ds.util.duration = function(s) {
     return d * 1000;
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+module.exports = common;
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
