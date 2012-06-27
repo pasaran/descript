@@ -1,35 +1,35 @@
-// ----------------------------------------------------------------------------------------------------------------- //
-// ds.Response
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  Response
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-/**
-    @constructor
-    @param {nodeServerResponse} response
-*/
-ds.Response = function(response) {
+var Response = function(response) {
     this._response = response;
 
     this.headers = {};
     this.cookies = {};
 };
 
-ds.Response.prototype.setHeader = function(name, value) {
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Response.prototype.setHeader = function(name, value) {
     this.headers[name] = value;
 };
 
-ds.Response.prototype.setCookie = function(name, value) {
+Response.prototype.setCookie = function(name, value) {
     this.cookies[name] = value;
 };
 
-ds.Response.prototype.setStatus = function(status) {
+Response.prototype.setStatus = function(status) {
     this.status = status;
 };
 
-ds.Response.prototype.setRedirect = function(location) {
+Response.prototype.setRedirect = function(location) {
     this.location = location;
 };
 
-ds.Response.prototype.end = function(result) {
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Response.prototype.end = function(result) {
     var response = this._response;
 
     var headers = this.headers;
@@ -56,5 +56,9 @@ ds.Response.prototype.end = function(result) {
     response.end();
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+module.exports = Response;
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 

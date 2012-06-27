@@ -2,24 +2,28 @@
 //  Block
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-var Block = function(block, config, sandbox, options) {};
+var de = require('./de.js');
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.prototype._init = function(config, sandbox, options) {
-    this.config = config;
-    this.sandbox = sandbox;
+var Block = function(block, descript, options) {};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+Block.prototype._init = function(descript, options) {
+    this.descript = descript;
 
     var _options = this.options = options || {};
 
     this.priority = 0;
 
-    this.dirname = _options.dirname || config.rootdir;
+    this.dirname = _options.dirname || descript.config.rootdir;
 
     var guard = _options.guard;
     if (guard) {
-        if (typeof guard === 'string') { // Нужно скомпилировать в функцию. Т.е. можно писать так:
-                                         // guard: 'state.foo && !request.boo'
+        if (typeof guard === 'string') {
+            //  Нужно скомпилировать в функцию. Т.е. можно писать так:
+            //      guard: 'state.foo && !request.boo'
             this.guard = new Function('context', 'var state = context.state, request = context.request; return ' + guard + ';');
         } else {
             this.guard = guard;
@@ -29,7 +33,7 @@ Block.prototype._init = function(config, sandbox, options) {
     var select = _options.select;
     if (select) {
         for (var key in select) {
-            select[key] = ds.util.compileJPath(select[key]);
+            select[key] = de.compileJPath(select[key]);
         }
         this.select = select;
     }
@@ -41,7 +45,7 @@ Block.prototype._init = function(config, sandbox, options) {
 
     if (_options.key && _options.maxage !== undefined) {
         this.key = _options.key;
-        this.maxage = ds.util.duration( _options.maxage );
+        this.maxage = de.duration( _options.maxage );
     }
 };
 
@@ -172,8 +176,8 @@ Block.prototype.setPriority = function(priority) {
 //  Block.Array
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.Array = function(array, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.Array = function(array, descript, options) {
+    this._init(descript, options);
 
     var blocks = this.blocks = [];
 
@@ -219,8 +223,8 @@ Block.Array.prototype.setPriority = function(priority) {
 //  Block.Object
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.Object = function(object, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.Object = function(object, descript, options) {
+    this._init(descript, options);
 
     var blocks = this.blocks = [];
     var keys = this.keys = [];
@@ -255,16 +259,16 @@ Block.Object.prototype.getResult = function(result) {
 //  Block.File
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.File = function(filename, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.File = function(filename, descript, options) {
+    this._init(descript, options);
 
-    this.filename = ds.util.compileString(filename);
+    this.filename = de.compileString(filename);
 };
 
 node.util.inherits( Block.File, Block );
 
 Block.File.prototype._run = function(promise, context, params) {
-    var filename = ds.util.resolveFilename( this.dirname, this.filename(context, params) );
+    var filename = de.resolveFilename( this.dirname, this.filename(context, params) );
 
     de.file.get(filename)
         .then(function(result) {
@@ -281,8 +285,8 @@ Block.File.prototype._run = function(promise, context, params) {
 //  Block.Function
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.Function = function(func, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.Function = function(func, descript, options) {
+    this._init(descript, options);
 
     this.func = func;
 };
@@ -304,15 +308,15 @@ Block.Function.prototype._run = function(promise, context, params) {
 //  Block.Call
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.Call = function(call, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.Call = function(call, descript, options) {
+    this._init(descript, options);
 
     var r = call.match(/^(?:(.*?):)?(.*)\(\)$/);
 
-    var module = r[1] || ds.config.defaultModule;
+    var module = r[1] || '';
     var method = this.method = r[2];
 
-    module = ds.modules[module];
+    module = descript.modules[module];
 
     call = module[method];
     this.call = (typeof call === 'function') ? call : module;
@@ -329,20 +333,20 @@ Block.Call.prototype._run = function(promise, context, params) {
 //  Block.Include
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.Include = function(filename, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.Include = function(filename, descript, options) {
+    this._init(descript, options);
 
-    this.filename = ds.util.compileString(filename);
+    this.filename = de.compileString(filename);
 };
 
 node.util.inherits(Block.Include, Block);
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-var Block.Include._cache = {};
+Block.Include._cache = {};
 
 Block.Include.prototype._run = function(promise, context, params) {
-    var filename = ds.util.resolveFilename( this.dirname, this.filename(context, params) );
+    var filename = de.resolveFilename( this.dirname, this.filename(context, params) );
 
     var block = Block.Include._cache[ filename ];
     if (block) {
@@ -357,11 +361,12 @@ Block.Include.prototype._run = function(promise, context, params) {
     de.file.get(filename)
         .then(function(result) {
             try {
-                var include = node.vm.runInNewContext( '(' + result + ')', ds.sandbox, filename);
+                //  FIXME: Защита от модификации sandbox.
+                var include = node.vm.runInNewContext( '(' + result + ')', that.descript.sandbox, filename);
 
                 var dirname = node.path.dirname(filename);
 
-                var options = ds.util.extend( {}, that.options, { dirname: dirname } );
+                var options = de.extend( {}, that.options, { dirname: dirname } );
                 var block = Block.Include._cache[ filename ] = new Block.Root(include, options);
 
                 block.run(context, params).then(function(result) {
@@ -389,15 +394,15 @@ no.events.on('file-changed', function(e, filename) {
 //  Block.Http
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.Http = function(url, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.Http = function(url, descript, options) {
+    this._init(descript, options);
 
     if (/(\?|&)$/.test(url)) {
         this.extend = true;
         url = url.substr(0, url.length - 1);
     }
 
-    this.url = ds.util.compileString(url);
+    this.url = de.compileString(url);
 };
 
 node.util.inherits(Block.Http, Block);
@@ -425,8 +430,8 @@ Block.Http.prototype._run = function(promise, context, params) {
 //  Block.Value
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.Value = function(value, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.Value = function(value, descript, options) {
+    this._init(descript, options);
 
     this.value = value;
 };
@@ -444,8 +449,8 @@ Block.Value.prototype._run = function(promise, context, params) {
 //  Block.Root
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.Root = function(root, config, sandbox, options) {
-    this._init(config, sandbox, options);
+Block.Root = function(root, descript, options) {
+    this._init(descript, options);
 
     this.root = Block.compile(root, options);
 
@@ -508,7 +513,7 @@ Block.Root.prototype._run = function(promise, context, params) {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-Block.compile = function(block, config, sandbox, options) {
+Block.compile = function(block, descript, options) {
 
     // options = options || {};
 
@@ -523,18 +528,18 @@ Block.compile = function(block, config, sandbox, options) {
 
             if (( r = /^http:\/\//.test(block) )) { // Строка начинается с 'http://' -- это http-блок.
                                                     // FIXME: Поддержка https, post, get и т.д.
-                compiled = new Block.Http(block, options);
+                compiled = new Block.Http(block, descript, options);
 
             } else if (( r = block.match(/^(.*\(\))(\d+)?$/) )) { // Строка оканчивается на '()' -- это call-блок.
-                compiled = new Block.Call(r[1], options);
+                compiled = new Block.Call(r[1], descript, options);
                 priority = r[2];
 
             } else if (( r = block.match(/^(.*\.jsx)(\d+)?$/) )) { // Строка оканчивается на '.jsx' -- это include-блок.
-                compiled = new Block.Include(r[1], options);
+                compiled = new Block.Include(r[1], descript, options);
                 priority = r[2];
 
             } else if (( r = block.match(/^(.*\.(?:json|txt|xml))(\d+)?$/) )) { // Строка оканчивается на '.json' -- это file-блок.
-                compiled = new Block.File(r[1], options);
+                compiled = new Block.File(r[1], descript, options);
                 priority = r[2];
 
             //  В предыдущих трех случаях в конце строки может быть число, означающее приоритет.
@@ -570,11 +575,11 @@ Block.compile = function(block, config, sandbox, options) {
 
             //  NOTE: Тут нельзя использовать (block instanceof Array) потому, что .jsx файлы эвалятся
             //  в другом контексте и там другой Array. Для справки -- util.isArray примерно в 10 раз медленнее, чем instanceof.
-            if (Array.isArray(block)) {
-                compiled = new Block.Array(block, options);
+            if ( Array.isArray(block) ) {
+                compiled = new Block.Array(block, descript, options);
 
-            } else if (block && !(block instanceof Block)) {
-                compiled = new Block.Object(/** @type {!Object} */ block, options);
+            } else if ( block && !(block instanceof Block) ) {
+                compiled = new Block.Object(block, descript, options);
 
             } else {
                 compiled = block;
@@ -585,16 +590,14 @@ Block.compile = function(block, config, sandbox, options) {
 
         case 'function':
 
-            /** @type {function(ds.Context)} */ block;
-
-            compiled = new Block.Function(block, options);
+            compiled = new Block.Function(block, descript, options);
 
             break;
 
     }
 
     if (!compiled) {
-        compiled = new Block.Value(block, options);
+        compiled = new Block.Value(block, descript, options);
     }
 
     if (priority) {
@@ -604,4 +607,10 @@ Block.compile = function(block, config, sandbox, options) {
     return compiled;
 
 };
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+module.exports = Block;
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
