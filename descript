@@ -1,8 +1,56 @@
 #!/usr/bin/env node
 
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+var path_ = require('path');
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+var nopt = require('nopt');
+
+var options = nopt({
+    'port': String,
+    'socket': String,
+    'rootdir': String,
+    'config': String,
+    'help': Boolean
+});
+
+if (options.help) {
+    //  TODO.
+    console.log('Usage: descript --port 2000 --rootdir .');
+    console.log();
+
+    process.exit(0);
+}
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
 var Descript = require('./lib/descript.js');
 
-var descript = new Descript({}, {});
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+var config;
+if (options.config) {
+    config = Descript.readConfig(options.config);
+} else {
+    config = {};
+}
+
+config.port = options.port || config.port || 2000;
+config.socket = options.socket || config.socket;
+config.rootdir = path_.resolve( options.rootdir || config.rootdir || '.' );
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+if (config.modules) {
+    var dirname = path_.dirname( path_.resolve(options.config) );
+    var modules = Descript.readModules(config.modules, dirname);
+}
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+var descript = new Descript(config, modules);
 
 descript.start();
 

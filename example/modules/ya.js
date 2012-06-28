@@ -1,20 +1,24 @@
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
+//  module.ya
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-ds.modules['ya'] = {};
+var querystring_ = require('querystring');
 
-// ----------------------------------------------------------------------------------------------------------------- //
+var de = require('../../lib/de.js');
+var Result = require('../../lib/result.js');
 
-/**
-    @param {no.Promise} promise
-    @param {ds.Context} context
-    @param {!Object} params
-*/
-ds.modules['ya']['auth'] = function(promise, context, params) {
-    var blackboxConfig = ds.config['blackbox'];
-    var request = context['request'];
+//  ---------------------------------------------------------------------------------------------------------------  //
 
-    var host = blackboxConfig['host'];
-    var path = blackboxConfig['path'] + '?' + node.querystring.stringify({
+var ya = {};
+
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+ya.auth = function(config, promise, context, params) {
+    var blackboxConfig = config.blackbox;
+    var request = context.request;
+
+    var host = blackboxConfig.host;
+    var path = blackboxConfig.path + '?' + querystring_.stringify({
         'method': 'sessionid',
         'userip': request.headers['x-real-ip'],
         'sessionid': request.cookies['Session_id'] || '',
@@ -30,12 +34,16 @@ ds.modules['ya']['auth'] = function(promise, context, params) {
         }
     )
     .then(function(result) {
-        promise.resolve( new ds.Result.Raw(result, true) );
+        promise.resolve( new Result.Raw(result, true) );
     })
     .else_(function(error) {
-        promise.resolve( new ds.Result.Error(error) );
+        promise.resolve( new Result.Error(error) );
     });
 };
 
-// ----------------------------------------------------------------------------------------------------------------- //
+//  ---------------------------------------------------------------------------------------------------------------  //
+
+module.exports = ya;
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 

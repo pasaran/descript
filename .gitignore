@@ -1,4 +1,3 @@
 *.swp
-/descript.js
-
+node_modules
 
