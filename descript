@@ -17,11 +17,7 @@ var options = nopt({
 });
 
 if (options.help) {
-    //  TODO.
-    console.log('Usage: descript --port 2000 --rootdir .');
-    console.log();
-
-    process.exit(0);
+    usage();
 }
 
 //  ---------------------------------------------------------------------------------------------------------------  //
@@ -37,9 +33,24 @@ if (options.config) {
     config = {};
 }
 
-config.port = options.port || config.port || 2000;
+config.port = options.port || config.port;
 config.socket = options.socket || config.socket;
 config.rootdir = path_.resolve( options.rootdir || config.rootdir || '.' );
+
+if ( !(config.port || config.socket) ) {
+    usage();
+}
+
+function usage() {
+    //  TODO.
+    console.log('Usage:');
+    console.log('   ./descript --port 2000 --rootdir example/pages');
+    console.log('   ./descript --socket descript.sock --rootdir examples/pages');
+    console.log('   ./descript --config config.json');
+    console.log();
+
+    process.exit(0);
+}
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
