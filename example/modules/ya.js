@@ -13,8 +13,8 @@ var ya = {};
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-ya.auth = function(config, promise, context, params) {
-    var blackboxConfig = config.blackbox;
+ya.auth = function(descript, promise, context, params) {
+    var blackboxConfig = descript.config.blackbox;
     var request = context.request;
 
     var host = blackboxConfig.host;
