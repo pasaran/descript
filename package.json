@@ -1,0 +1,32 @@
+{
+    "author": {
+        "name": "Sergey Nikitin",
+        "email": "nik.pasaran@gmail.com",
+        "url": "https://github.com/pasaran"
+    },
+    "name": "descript",
+    "description": "descript",
+    "version": "0.0.1",
+    "homepage": "https://github.com/pasaran/descript",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/pasaran/descript.git"
+    },
+    "dependencies": {
+        "nopt": "*",
+        "noscript": "*"
+    },
+    "devDependencies": {},
+    "optionalDependencies": {},
+    "engines": {
+        "node": "*"
+    },
+    "bin": "descript",
+    "main": "./descript.js",
+    "files": [
+        "lib",
+        "descript",
+        "descript.js"
+    ]
+}
+
