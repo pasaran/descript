@@ -2,71 +2,15 @@
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-var path_ = require('path');
-
-//  ---------------------------------------------------------------------------------------------------------------  //
-
-var nopt = require('nopt');
-
-var options = nopt({
-    'port': String,
-    'socket': String,
-    'rootdir': String,
-    'config': String,
-    'help': Boolean
-});
-
-if (options.help) {
-    usage();
-}
-
-//  ---------------------------------------------------------------------------------------------------------------  //
-
 var de = require('./descript.js');
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-var config;
-var basedir;
-if (options.config) {
-    config = de.Script.readConfig(options.config);
-    basedir = path_.dirname( path_.resolve(options.config) );
-} else {
-    config = {};
-    basedir = path_.resolve('.');
-}
-
-config.port = options.port || config.port;
-config.socket = options.socket || config.socket;
-config.rootdir = path_.resolve(basedir, options.rootdir || config.rootdir || '.' );
-
-if ( !(config.port || config.socket) ) {
-    usage();
-}
-
-function usage() {
-    //  TODO.
-    console.log('Usage:');
-    console.log('   ./descript --port 2000 --rootdir test/pages');
-    console.log('   ./descript --socket descript.sock --rootdir test/pages');
-    console.log('   ./descript --config test/config.json');
-    console.log();
-
-    process.exit(0);
-}
-
-//  ---------------------------------------------------------------------------------------------------------------  //
-
-if (config.modules) {
-    var dirname = path_.dirname( path_.resolve(options.config) );
-    var modules = de.Script.readModules(config.modules, dirname);
-}
-
-//  ---------------------------------------------------------------------------------------------------------------  //
-
-var descript = new de.Script(config, modules);
+var descript = de.Script.create();
 
 descript.start();
+
+//  ---------------------------------------------------------------------------------------------------------------  //
 
 // vim: set filetype=javascript:
 
