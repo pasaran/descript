@@ -22,14 +22,14 @@ if (options.help) {
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-var Descript = require('./lib/descript.js');
+var de = require('./descript.js');
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
 var config;
 var basedir;
 if (options.config) {
-    config = Descript.readConfig(options.config);
+    config = de.Script.readConfig(options.config);
     basedir = path_.dirname( path_.resolve(options.config) );
 } else {
     config = {};
@@ -59,12 +59,12 @@ function usage() {
 
 if (config.modules) {
     var dirname = path_.dirname( path_.resolve(options.config) );
-    var modules = Descript.readModules(config.modules, dirname);
+    var modules = de.Script.readModules(config.modules, dirname);
 }
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
-var descript = new Descript(config, modules);
+var descript = new de.Script(config, modules);
 
 descript.start();
 
