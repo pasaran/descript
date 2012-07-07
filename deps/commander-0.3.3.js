@@ -768,7 +768,7 @@ Command.prototype.password = function(str, mask, fn){
     mask = '';
   }
 
-  tty.setRawMode(true);
+  process.stdin.setRawMode(true);
   process.stdout.write(str);
 
   // keypress
@@ -776,7 +776,7 @@ Command.prototype.password = function(str, mask, fn){
     if (key && 'enter' == key.name) {
       console.log();
       process.stdin.removeAllListeners('keypress');
-      tty.setRawMode(false);
+      process.stdin.setRawMode(false);
       if (!buf.trim().length) return self.password(str, mask, fn);
       fn(buf);
       return;
