@@ -744,5 +744,7 @@ ds.sandbox['func'] = function(func, options) {
     return new ds.Block.Function(func, options);
 };
 
+ds.sandbox['console'] = console;
+
 // ----------------------------------------------------------------------------------------------------------------- //
 
