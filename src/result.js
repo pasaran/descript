@@ -26,8 +26,9 @@ ds.Result.prototype.write = function(stream) {};
 /**
     @return {string}
 */
-ds.Result.prototype.formatted = function() {
-    return JSON.stringify( this.object(), null, '    ' );
+ds.Result.prototype.formatted = function(path) {
+    var obj = path ? no.path(path, this.object()) : this.object();
+    return JSON.stringify(obj, null, 4);
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //

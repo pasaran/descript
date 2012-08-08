@@ -6,6 +6,7 @@ cat noscript/src/no/no.js \
     noscript/src/no/no.events.js \
     noscript/src/no/no.promise.js \
     noscript/src/no/no.future.js \
+    noscript/src/no/no.path.js \
     \
     noscript/src/de/de.js \
     noscript/src/de/de.file.js \
