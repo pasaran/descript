@@ -66,6 +66,8 @@ ds.Block.prototype.setOptions = function(options) {
         this.key = _options.key;
         this.maxage = ds.util.duration( _options.maxage );
     }
+
+    this.params = options.params;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
@@ -171,7 +173,10 @@ ds.Block.prototype.run = function(context, params) {
             });
         }
 
-        // params = (this.params) ? this.params(context, params) : params; // FIXME: Пока вроде не нужно.
+        var _params = this.params;
+        if (_params) {
+            params = (typeof _params === 'function') ? _params(context, params) : _params;
+        }
 
         if (!isCached) {
             this._run(promise, context, params);
