@@ -67,7 +67,7 @@ ds.Block.prototype.setOptions = function(options) {
         this.maxage = ds.util.duration( _options.maxage );
     }
 
-    this.params = options.params;
+    this.params = _options.params;
 };
 
 // ----------------------------------------------------------------------------------------------------------------- //
