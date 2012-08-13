@@ -5,7 +5,7 @@
 var querystring_ = require('querystring');
 
 var de = require('../../lib/de.js');
-var Result = require('../../lib/result.js');
+var Result = require('../../lib/de.result.js');
 
 //  ---------------------------------------------------------------------------------------------------------------  //
 
