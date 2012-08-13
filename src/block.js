@@ -452,6 +452,7 @@ ds.Block.Include.prototype._run = function(promise, context, params) {
                 var dirname = node.path.dirname(filename);
 
                 var options = /** @type {ds.Options} */ ( ds.util.extend( {}, that.options, { dirname: dirname } ) ); // NOTE: Внешние скобки нужны, чтобы gcc применил type cast.
+                options.params = null;
                 var block = ds.Block.Include._cache[ filename ] = new ds.Block.Root(include, options);
 
                 block.run(context, params).then(function(result) {
