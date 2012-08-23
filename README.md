@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/pasaran/descript.png)](http://travis-ci.org/pasaran/descript)
 descript
 ========
 
