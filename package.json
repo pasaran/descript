@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "nopt": "*",
-        "noscript": "*"
+        "nommon": "*"
     },
     "devDependencies": {},
     "optionalDependencies": {},
