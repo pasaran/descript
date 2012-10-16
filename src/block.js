@@ -59,6 +59,7 @@ ds.Block.prototype.setOptions = function(options) {
 
     this.before = _options.before;
     this.after = _options.after;
+    this.dataType = _options.dataType || 'json';
 
     this.timeout = _options.timeout;
 
@@ -506,10 +507,16 @@ ds.Block.Http.prototype._run = function(promise, context, params) {
         this.url(context, params),
         (this.extend) ? params : null
     );
+    var dataType = this.dataType;
 
     de.http.get(options)
         .then(function(result) {
-            promise.resolve( new ds.Result.Raw(result, true) ); // FIXME: Учесть options.dataType.
+            if (dataType === 'text') {
+                promise.resolve( new ds.Result.Value(result.toString(), false) );
+            }
+            else {
+                promise.resolve( new ds.Result.Raw(result, true) ); // FIXME: Учесть options.dataType.
+            }
         })
         .else_(function(error) {
             promise.resolve( new ds.Result.Error(error) );
