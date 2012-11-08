@@ -22,11 +22,11 @@
         "node": "*"
     },
     "bin": "descript",
-    "main": "./descript.js",
+    "main": "lib/index.js",
     "files": [
-        "lib",
-        "descript",
-        "descript.js"
+        "lib/index.js",
+        "lib/de*.js",
+        "descript"
     ]
 }
 
