@@ -1,10 +1,15 @@
-//  /test.01.jsx?photo_id=42
+//  /test.01.jsx
+//  /test.01.jsx?skip=yes
+
 block({
-    photo: file('json/photo.{ .photo_id }.json', {
+    photo: file('json/photo.{ state.photo_id }.json', {
+        before: {
+            photo_id: 42
+        },
         after: {
             album_id: '.album_id'
         },
-        guard: '.photo_id == 42'
+        guard: '.skip != "yes"'
     }) +10,
     album: file('json/album.{ state.album_id }.json', {
         after: {
