@@ -3,16 +3,16 @@
 
 block({
     photo: file('json/photo.{ state.photo_id }.json', {
-        before: {
+        preselect: {
             photo_id: 42
         },
-        after: {
+        postselect: {
             album_id: '.album_id'
         },
         guard: '.skip != "yes"'
     }) +10,
     album: file('json/album.{ state.album_id }.json', {
-        after: {
+        postselect: {
             album_data: '.data'
         }
     })
