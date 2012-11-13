@@ -22,4 +22,9 @@ block({
         photo_data: '.photo.data',
         state: 'state'
     }
+    /*
+    result: function(params, context) {
+        return "hello";
+    }
+    */
 })
