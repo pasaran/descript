@@ -50,7 +50,7 @@
 
     Или же прямо из командной строки:
 
-        node -e 'require("./dummy.js")();'
+        node -e 'require("./dummy.js")(2000);'
 
 */
 
