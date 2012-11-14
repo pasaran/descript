@@ -21,3 +21,5 @@
 
   * Использовать path в nopt'е, чтобы сразу резолвить пути, заданные в коммандной строке.
 
+  * Использовать http.STATUS_CODES http://nodejs.org/api/http.html#http_http_status_codes
+

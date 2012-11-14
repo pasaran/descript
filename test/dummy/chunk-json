@@ -1,0 +1,26 @@
+{
+    "status": {
+        "value": "VALID",
+        "id": 0
+    },
+    "error": "OK",
+    "age": 228005,
+    "auth": {
+        "password_verification_age": 228005,
+        "have_password": true,
+        "secure": false,
+        "allow_plain_text": true
+    },
+    "uid": {
+        "value": "24171229",
+        "lite": false,
+        "hosted": false,
+        "domid": "",
+        "domain": "",
+        "mx": ""
+    },
+    "login": "alpha-san",
+    "karma": {
+        "value": 0
+    }
+}

@@ -1,0 +1,26 @@
+<auth>
+    <status id="0">
+        <value>VALID</value>
+    </status>
+    <error>OK</error>
+    <age>228005</age>
+    <auth>
+        <password_verification_age>228005</password_verification_age>
+        <have_password>true</have_password>
+        <secure>false</secure>
+        <allow_plain_text>true</allow_plain_text>
+    </auth>
+    <uid>
+        <value>24171229</value>
+        <lite>false</lite>
+        <hosted>false</hosted>
+        <domid></domid>
+        <domain></domain>
+        <mx></mx>
+    </uid>
+    <login>alpha-san</login>
+    <karma>
+        <value>0</value>
+    </karma>
+</auth>
+
