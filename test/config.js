@@ -1,16 +1,17 @@
 {
-    "port": 2000,
+    port: 2000,
 
-    "rootdir": "./pages",
+    rootdir: './pages',
 
-    "modules": {
-        "ya": "modules/ya.js"
+    /*
+    modules: {
+        ya: 'modules/ya.js'
     },
 
-    "blackbox": {
-        "host": "blackbox-mimino.yandex.net",
-        "path": "/blackbox",
-        "domain": "fotki.yandex.ru"
+    blackbox: {
+        url: 'blackbox-mimino.yandex.net/blackbox',
+        domain: 'fotki.yandex.ru'
     }
+    */
 }
 
