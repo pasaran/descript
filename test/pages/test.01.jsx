@@ -1,8 +1,8 @@
 //  /test.01.jsx
 //  /test.01.jsx?skip=yes
 
-block({
-    photo: file('json/photo.{ state.photo_id }.json', {
+de.block({
+    photo: de.file('json/photo.{ state.photo_id }.json', {
         preselect: {
             photo_id: 42
         },
@@ -11,7 +11,7 @@ block({
         },
         guard: '.skip != "yes"'
     }) +10,
-    album: file('json/album.{ state.album_id }.json', {
+    album: de.file('json/album.{ state.album_id }.json', {
         postselect: {
             album_data: '.data'
         }

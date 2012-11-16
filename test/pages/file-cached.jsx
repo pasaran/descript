@@ -1,4 +1,4 @@
-file('locale/ru.json', {
+de.file('locale/ru.json', {
     key: 'locale/ru.json',
     maxage: '+1h'
 })

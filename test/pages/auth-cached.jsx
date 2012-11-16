@@ -1,4 +1,4 @@
-call('ya:auth()', {
+de.call('ya:auth()', {
     key: 'auth',
     maxage: '+1h'
 })

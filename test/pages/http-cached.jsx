@@ -1,4 +1,4 @@
-http('http://www.yandex.ru', {
+de.http('http://www.yandex.ru', {
     key: 'yandex',
     maxage: '+1h'
 })
