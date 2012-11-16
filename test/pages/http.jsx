@@ -1,1 +1,1 @@
-'http://www.yandex.ru'
+de.http('http://www.yandex.ru')
