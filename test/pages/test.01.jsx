@@ -2,17 +2,18 @@
 //  /test.01.jsx?skip=yes
 
 de.block({
+    /// photo: de.file('json/photo.{ config.id }.json', {
     photo: de.file('json/photo.{ state.photo_id }.json', {
-        preselect: {
+        selectBefore: {
             photo_id: 42
         },
-        postselect: {
+        selectAfter: {
             album_id: '.album_id'
         },
         guard: '.skip != "yes"'
     }) +10,
     album: de.file('json/album.{ state.album_id }.json', {
-        postselect: {
+        selectAfter: {
             album_data: '.data'
         }
     })

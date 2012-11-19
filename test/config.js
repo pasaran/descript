@@ -3,6 +3,8 @@
 
     rootdir: './pages',
 
+    id: 42,
+
     /*
     modules: {
         ya: 'modules/ya.js'
