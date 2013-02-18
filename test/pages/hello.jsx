@@ -1,6 +1,7 @@
 de.object({
     username: 'nop'
 }, {
-    template: './template.js'
+    guard: '.foo',
+    //  template: './template.js'
 })
 
