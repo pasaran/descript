@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "nopt": "*",
-        "nommon": "0.0.13"
+        "nommon": "0.0.15"
     },
     "devDependencies": {},
     "optionalDependencies": {},
