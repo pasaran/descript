@@ -6,7 +6,7 @@
     },
     "name": "descript",
     "description": "descript",
-    "version": "0.0.30",
+    "version": "0.0.31",
     "homepage": "https://github.com/pasaran/descript",
     "repository": {
         "type": "git",
@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "nopt": "*",
-        "nommon": "0.0.15"
+        "nommon": "0.0.16"
     },
     "devDependencies": {},
     "optionalDependencies": {},
