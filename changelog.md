@@ -29,3 +29,16 @@ ChangeLog
   * Что делать с Response?
     Кажется, нужно унести все просто в контекст.
     И иметь метод типа `context.end(response)`, который выставит куки-заголовки и т.д.
+
+  * Объект de.Request не содержит оригинального request'а (во избежание).
+    Имеет поля:
+
+      * `headers` — http-заголовки, пришедшие в реквесте.
+
+      * `cookies` — куки.
+
+      * `url` — объект, получающийся из `require('url').parse(req.url, true, true).
+        (http://nodejs.org/api/url.html#url_url)[http://nodejs.org/api/url.html#url_url].
+        Если это был `POST`-запрос, то в `url.query` будут параметры из тела запроса.
+
+      * `method` — метод (`GET`, `POST`, ...).
