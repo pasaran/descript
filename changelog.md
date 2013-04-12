@@ -18,27 +18,51 @@ ChangeLog
             console.log(o.foo.bar);
         }
 
-  * Контекст первым параметром принимает конфиг (это по идее единственный обязательный параметр):
+  * Изменения в `de.Context`:
 
-        new de.Context(config)
-        new de.Context(config, request, response)
-        new de.Context(config, ...)
+      * Конструктор `de.Context()` первым параметром принимает или нодовский реквест (`http.IncomingMessage`),
+        или просто объект с параметрами.
 
-    Непонятно, что еще может быть. `de.Request`? Например просто params?
+      * Инстанс `de.Context` содержит поля:
 
-  * Что делать с Response?
-    Кажется, нужно унести все просто в контекст.
-    И иметь метод типа `context.end(response)`, который выставит куки-заголовки и т.д.
+          * `request` — может быть null, если в конструктор были переданы просто параметры.
+            Либо инстанс `de.Request`.
 
-  * Объект de.Request не содержит оригинального request'а (во избежание).
-    Имеет поля:
+          * `response` — инстанс `de.Response`.
 
-      * `headers` — http-заголовки, пришедшие в реквесте.
+          * `query` — все параметры (включая извлеченные из body запроса при `post`-запросе).
 
-      * `cookies` — куки.
+          * `state` — общий стейт для обмена информацией между блоками.
 
-      * `url` — объект, получающийся из `require('url').parse(req.url, true, true).
-        (http://nodejs.org/api/url.html#url_url)[http://nodejs.org/api/url.html#url_url].
-        Если это был `POST`-запрос, то в `url.query` будут параметры из тела запроса.
+          * `config` — ссылка на `de.config`.
 
-      * `method` — метод (`GET`, `POST`, ...).
+      * `de.Context.create(request)` — метод для создания контекста, возвращает promise,
+        в который уже приходит готовый контекст. Сделано так потому, что если это `post`-запрос,
+        то тело запроса (и параметры из него) получаются асинхронно.
+
+  * Изменения в `de.Response`:
+
+      * Больше не содержит ссылку на нодовский `http.ServerResponse`.
+
+      * Появился метод `end(response, result)` — первым параметром принимает `http.ServerResponse`,
+        второй (опциональный) — `de.Result`.
+        Метод выставляет заголовки, код ответа, редиректы и т.д.
+        Если передан `result`, то выводит его в поток (попутно выставляя `content-type`) и закрывает поток.
+
+  * Изменения в `de.Request`:
+
+      * Больше не содержит ссылку на нодовский `http.IncomingMessage`.
+
+      * Имеет поля:
+
+          * `headers` — http-заголовки, пришедшие в реквесте.
+
+          * `cookies` — куки.
+
+          * `url` — объект, получающийся из `require('url').parse(req.url, true, true).
+            (http://nodejs.org/api/url.html#url_url)[http://nodejs.org/api/url.html#url_url].
+
+            Если это был `POST`-запрос, то в `url.query` будут параметры из тела запроса.
+
+          * `method` — метод (`GET`, `POST`, ...).
+
