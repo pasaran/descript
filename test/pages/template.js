@@ -1,4 +1,4 @@
 function(data) {
-    return 'Hello, ' + data.username
+    return 'Hello, <b>' + data.username + '</b>';
 }
 
