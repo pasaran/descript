@@ -106,7 +106,7 @@ ChangeLog
 
           * `cookies` — куки.
 
-          * `url` — объект, получающийся из `require('url').parse(req.url, true, true).
+          * `url` — объект, получающийся из `require('url').parse(req.url, true, true)`.
             (http://nodejs.org/api/url.html#url_url)[http://nodejs.org/api/url.html#url_url].
 
             Если это был `POST`-запрос, то в `url.query` будут параметры из тела запроса.
