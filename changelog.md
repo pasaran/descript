@@ -18,6 +18,53 @@ ChangeLog
             console.log(o.foo.bar);
         }
 
+  * Поправлено JS API. Минимально работающий вариант:
+
+        var de = require('descript');
+
+        de.script.init();
+
+        de.Block.compile('http://yandex.ru/yandsearch?')
+            .run({ text: 'descript' })
+                .then(function(result) {
+                    console.log( result.string() );
+                });
+
+    В этом примере контекст создается автоматически (при этом и доступа к нему нет).
+    В `result` находится инстанс `de.Result`.
+
+    Более сложный вариант:
+
+        var http = require('http');
+        var de = require('descript');
+
+        de.script.init();
+
+        var block = de.Block.compile('http://yandex.ru/yandsearch?');
+
+        http
+            .createServer(function(req, res) {
+                //  Создаем (асинхронно) контекст.
+                de.Context.create(req).done(function(context) {
+                    block
+                        .run({ text: 'descript' })
+                            .then(function(result) {
+                                //  Этот метод выставляет все заголовки и т.д.,
+                                //  а также выводит результат в выходной поток (res) и закрывает поток.
+                                context.response.end(res, result);
+                            });
+                });
+            })
+            .listen(2000);
+
+    Альтернативный вариант — использовать `de.server.start()` для поднятия сервера автоматически:
+
+        var de = require('descript');
+
+        de.server.init();
+        de.server.start();
+
+
   * Изменения в `de.Context`:
 
       * Конструктор `de.Context()` первым параметром принимает или нодовский реквест (`http.IncomingMessage`),
