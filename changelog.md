@@ -8,10 +8,10 @@ ChangeLog
 
         de.object({
             //  Выводим весь конфиг целиком.
-            config: de.value(config),
+            config: de.value(de.config),
 
             //  Выводим отдельное поле конфига
-            host: de.value(config.backend.host)
+            host: de.value(de.config.backend.host)
         })
 
 
