@@ -1,6 +1,11 @@
 ChangeLog
 =========
 
+0.0.34
+------
+
+  * Merged pull request #42.
+
 0.0.33
 ------
 
