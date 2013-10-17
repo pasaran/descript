@@ -1,1 +1,6 @@
-de.http('http://mail.yandex.ru')
+de.http(
+    'http://yabacks.yandex.ru',
+    {
+        timeout: 3000
+    }
+)
