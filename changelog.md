@@ -1,18 +1,31 @@
-ChangeLog
-=========
+# ChangeLog
 
-0.0.35
-------
+## 0.0.36
+
+  * Базовое [логирование](https://github.com/pasaran/descript/issues/46).
+
+    В конфиге можно задать уровень логирования и logger:
+
+        log: {
+            //  По-умолчанию: 'debug'.
+            //  Возможные значения: 'off', 'error', 'warn', 'info', 'debug'.
+            level: 'debug',
+
+            //  См. 'lib/de.logger.js' — дефолтный logger.
+            logger: './my-logger.js'
+        }
+
+  * `nommon` версии `0.0.24`.
+
+## 0.0.35
 
   * Merged pull request #44.
 
-0.0.34
-------
+## 0.0.34
 
   * Merged pull request #42.
 
-0.0.33
-------
+## 0.0.33
 
   * В `.jsx`-файлах доступен конфиг:
 
@@ -25,8 +38,7 @@ ChangeLog
         })
 
 
-0.0.32
-------
+## 0.0.32
 
   * Ключик `--cpus` переименован в `--workers`.
     Вместо `--cpus 2` нужно использовать `--workers 1`.
