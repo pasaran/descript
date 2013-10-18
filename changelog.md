@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 0.0.37
+
+  * Merged pull request #48.
+
 ## 0.0.36
 
   * Базовое [логирование](https://github.com/pasaran/descript/issues/46).
