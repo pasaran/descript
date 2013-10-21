@@ -1,1 +1,1 @@
-'locale/ru.json'
+de.file('locale/ru.json')
