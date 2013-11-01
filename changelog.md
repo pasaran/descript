@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 0.0.41
+
+  * Merged pull request #50.
+
 ## 0.0.40
 
   * `de.server.route` — метод, возвращающий либо строку с путем к jsx-файлу, либо инсанс `de.Block.*`.
