@@ -1,5 +1,14 @@
 # ChangeLog
 
+## 0.0.42
+
+  * Merged pull request #51.
+
+  * `require` должен работать в исполняемых descript'ом файлах. Например, в шаблонах,
+    в jsx-файлах и т.д.
+
+  * `nommon` версии `0.0.28`.
+
 ## 0.0.41
 
   * Merged pull request #50.
