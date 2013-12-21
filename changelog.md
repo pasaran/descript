@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 0.0.44
+
+  * Merged pull request #55.
+
 ## 0.0.43
 
   * Merged pull request #54.
