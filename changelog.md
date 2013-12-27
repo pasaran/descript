@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 0.0.46
+
+  * Откатил #57.
+
 ## 0.0.45
 
   * Merged pull request #57.
