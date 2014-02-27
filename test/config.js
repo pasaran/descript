@@ -5,6 +5,10 @@
 
     id: 42,
 
+    log: {
+        level: 'debug'
+    }
+
     /*
     modules: {
         ya: 'modules/ya.js'
