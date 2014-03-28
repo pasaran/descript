@@ -1,5 +1,13 @@
 # ChangeLog
 
+# 0.0.53
+
+  * Merged pull request #78. Декларативная конструкция для гибкой работы со state.
+  * Merged pull request #76. de.script.init() config support.
+  * Merged pull request #75. Fixes #73.
+  * Merged pull request #72. logging http get params.
+  * Merged pull request #56. Specify filename for running block.
+
 # 0.0.52
 
   * Fix для 0.0.49. Опечатка.
