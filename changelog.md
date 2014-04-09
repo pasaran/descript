@@ -1,5 +1,12 @@
 # ChangeLog
 
+# 0.0.54
+
+  * Fixed #84. Local block.
+  * Merged pull request #83. Log code and signal on fork process exit
+  * Merged pull request #82. Removed duplicated method
+  * Merged pull request #80. Debug log found in cache with key message
+
 # 0.0.53
 
   * Merged pull request #78. Декларативная конструкция для гибкой работы со state.
