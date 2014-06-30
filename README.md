@@ -6,3 +6,10 @@ descript
 
 Подробнее в [вики](descript/wiki).
 
+## quick start
+
+```
+npm install
+./descript --config test/config.js
+# Open http://localhost:2000/hello.jsx in your favorite browser.
+```
