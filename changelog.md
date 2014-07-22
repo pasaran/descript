@@ -1,5 +1,11 @@
 # ChangeLog
 
+# 0.0.55
+
+  * Date format support in `de.config`. Merged pull requests #90, #92.
+  * Fixed #93. Флаг `only_status` возвращает заголовки. Merged pull request #94.
+  * Merged pull request #95. `options.headers` in http block.
+
 # 0.0.54
 
   * Fixed #84. Local block.
