@@ -1,5 +1,9 @@
 # ChangeLog
 
+# 0.0.56
+
+  * Fixed #96. Странное поведение include блока.
+
 # 0.0.55
 
   * Date format support in `de.config`. Merged pull requests #90, #92.
