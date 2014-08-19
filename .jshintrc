@@ -1,0 +1,10 @@
+{
+    "eqnull": true,
+    "shadow": true,
+    "evil": true,
+    "expr": true,
+    "loopfunc": true,
+    "proto": true,
+    "sub": true
+}
+
