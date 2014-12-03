@@ -1,5 +1,10 @@
 # ChangeLog
 
+  * Merged pull request #102. fix overwrite dirname in include block.
+  * Merged pull request #101. support of JSON in post requests.
+  * Merged pull request #100. clear timeout when block fails.
+  * Merged pull request #99. https support + http_options support.
+
 # 0.0.57
 
   * Fix для 0.0.56.
