@@ -1,5 +1,11 @@
 # ChangeLog
 
+# 0.0.59
+
+  * Merged pull request #103. Вычислять значение Content-Length с учетом UTF-8.
+
+# 0.0.58
+
   * Merged pull request #102. fix overwrite dirname in include block.
   * Merged pull request #101. support of JSON in post requests.
   * Merged pull request #100. clear timeout when block fails.
