@@ -1,5 +1,10 @@
 # ChangeLog
 
+# 0.0.62
+
+  * Merged pull request #118. Fix for PUT and body option.
+  * Fixed #123. Fix for PATCH and body option.
+
 # 0.0.61
 
   * Merged pull request #117. Небольшие улучшения логирования.
