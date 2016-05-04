@@ -1,52 +1,52 @@
 # ChangeLog
 
-# 0.0.62
+## 0.0.62
 
   * Merged pull request #118. Fix for PUT and body option.
   * Fixed #123. Fix for PATCH and body option.
 
-# 0.0.61
+## 0.0.61
 
   * Merged pull request #117. Небольшие улучшения логирования.
 
-# 0.0.60
+## 0.0.60
 
   * Merged pull request #114. Параметр body http-блока, для явного задания тела пост-запроса.
   * Merged pull request #108. Фикс: когда блок успевает выполниться до того, как мы установили таймер таймаута в логи пишется ошибка таймаута.
 
-# 0.0.59
+## 0.0.59
 
   * Merged pull request #103. Вычислять значение Content-Length с учетом UTF-8.
 
-# 0.0.58
+## 0.0.58
 
   * Merged pull request #102. fix overwrite dirname in include block.
   * Merged pull request #101. support of JSON in post requests.
   * Merged pull request #100. clear timeout when block fails.
   * Merged pull request #99. https support + http_options support.
 
-# 0.0.57
+## 0.0.57
 
   * Fix для 0.0.56.
 
-# 0.0.56
+## 0.0.56
 
   * Fixed #96. Странное поведение include блока.
 
-# 0.0.55
+## 0.0.55
 
   * Date format support in `de.config`. Merged pull requests #90, #92.
   * Fixed #93. Флаг `only_status` возвращает заголовки. Merged pull request #94.
   * Merged pull request #95. `options.headers` in http block.
 
-# 0.0.54
+## 0.0.54
 
   * Fixed #84. Local block.
   * Merged pull request #83. Log code and signal on fork process exit
   * Merged pull request #82. Removed duplicated method
   * Merged pull request #80. Debug log found in cache with key message
 
-# 0.0.53
+## 0.0.53
 
   * Merged pull request #78. Декларативная конструкция для гибкой работы со state.
   * Merged pull request #76. de.script.init() config support.
@@ -54,15 +54,15 @@
   * Merged pull request #72. logging http get params.
   * Merged pull request #56. Specify filename for running block.
 
-# 0.0.52
+## 0.0.52
 
   * Fix для 0.0.49. Опечатка.
 
-# 0.0.51
+## 0.0.51
 
   * Fix для 0.0.49. Парсим тело ошибки, если там JSON.
 
-# 0.0.50
+## 0.0.50
 
   * Fix для 0.0.49. Приводим буфер к строке.
 
