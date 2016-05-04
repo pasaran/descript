@@ -1,5 +1,11 @@
 # ChangeLog
 
+## 0.0.63
+
+  * Merged pull request #129. Не падать, если ответ пуст или сформирован некорректно.
+  * Merged pull request #126. Экранируем HTTP-заголовки в ответе.
+  * Merged pull request #124. Don't treat `//` specially.
+
 ## 0.0.62
 
   * Merged pull request #118. Fix for PUT and body option.
