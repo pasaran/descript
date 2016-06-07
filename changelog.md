@@ -1,5 +1,9 @@
 # ChangeLog
 
+## 0.0.64
+
+  * Merged pull request #130. Header value should be a string.
+
 ## 0.0.63
 
   * Merged pull request #129. Не падать, если ответ пуст или сформирован некорректно.
